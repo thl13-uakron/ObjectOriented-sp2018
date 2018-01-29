@@ -5,13 +5,13 @@ Purpose: Simulate the card game of war
 */
 
 #include <iostream>
-#include "card.hpp"
 #include "player.hpp"
 
 /*
 Card class specifications:
 - A card essentially consists of a combination of a suit and a rank
 - Both are represented as private members using enumerated labels for abstraction
+- Overloaded ostream operators allow the enums to be displayed by their abstractedlabels
 - Card members are initialized through a constructor and cannot be modified further
 - Public getter functions are present for both members but there are no setters
 */
@@ -19,7 +19,9 @@ Card class specifications:
 /*
 Player class specifications:
 - The player's member data mainly consists of their face-down deck (private) and their face-up hand (public), both represented by deques of card objects
-- Getter functions are present to display the amount of cards in a player's possession
+- In addition, there are also members for the player's displayed name and the value of their most-recently played card
+- The "back" of each queue represents the most recently added card
+- Getter functions are present to display the amount of cards in a player's possession as well as their other private member data
 - Additional member functions allow players to "reveal" cards (move from deck to hand) and take all of the cards in the other player's hand if they "win" the play
 - Friend functions implemented to create and randomly split the original deck of cards at the beginning of the game and simulate plays within the game in which the players reveal and compare cards
 */
@@ -37,7 +39,7 @@ Game process;
 int main()
 {
     std::cout << "Game: WAR\n"; // display title text
-    std::cout << "Suits ignored, aces low\n\n";
+    std::cout << "Suits ignored, aces low.\n\n";
 
     // create objects for the players and assign cards to their decks
     Player* p1 = new Player("Player 1");
@@ -60,6 +62,6 @@ int main()
     {
         std::cout<< p2->getName();
     }
-    std::cout << "has won the game.";
+    std::cout << " has won the game.\n\n";
 }
 

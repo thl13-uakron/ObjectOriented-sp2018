@@ -3,37 +3,78 @@
 
 #include <iostream>
 
-/// cards consist of a suit and a rank as members.
-/// Both are represented through enumerated labels.
-
-enum Suit
+namespace
 {
-    Spades,
-    Clubs,
-    Hearts,
-    Diamonds,
-};
+    /// cards consist of a suit and a rank as members.
+    /// Both are represented through enumerated labels.
 
-enum Rank
-{
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
-};
+    enum Suit
+    {
+        Spades,
+        Clubs,
+        Hearts,
+        Diamonds,
+    };
 
-const int CARDS = 52;
-const int RANKS = 13;
-const int SUITS = 4;
+
+    enum Rank
+    {
+        Ace,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Ten,
+        Jack,
+        Queen,
+        King,
+    };
+
+    // overloaded ostream operators - enum labels get displayed instead of internal values
+    // abstracted info is more useful to outside users
+    // (code copied and modified from cppreference)
+    std::ostream& operator<<(std::ostream& os, Suit s)
+    {
+        switch(s)
+        {
+            case Spades : os << "Spades";    break;
+            case Clubs : os << "Clubs"; break;
+            case Hearts : os << "Hearts";  break;
+            case Diamonds : os << "Diamonds";   break;
+            default    : os.setstate(std::ios_base::failbit);
+        }
+        return os;
+    }
+    std::ostream& operator<<(std::ostream& os, Rank r)
+    {
+        switch(r)
+        {
+            case Ace   : os << "Ace";    break;
+            case Two : os << "Two"; break;
+            case Three : os << "Three";  break;
+            case Four : os << "Four";   break;
+            case Five  : os << "Five";    break;
+            case Six : os << "Six"; break;
+            case Seven : os << "Seven";  break;
+            case Eight : os << "Eight";   break;
+            case Nine   : os << "Nine";    break;
+            case Ten : os << "Ten"; break;
+            case Jack : os << "Jack";  break;
+            case Queen : os << "Queen";   break;
+            case King  : os << "King";    break;
+            default    : os.setstate(std::ios_base::failbit);
+        }
+        return os;
+    }
+
+    const int CARDS = 52;
+    const int RANKS = 13;
+    const int SUITS = 4;
+}
 
 class Card
 {
