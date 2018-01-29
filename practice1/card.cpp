@@ -4,20 +4,6 @@
 #include <iostream>
 #include "card.hpp"
 
-/// constructors
-
-Card::Card(int suit, int value)
-{
-    suitID = suit;
-    valueID = value;
-}
-
-Card::Card(std::string suit, std::string value)
-{
-    suitID = ::getSuitInternal(suit);
-    valueID = ::getValueInternal(value);
-}
-
-/// score getters (not implemented yet)
+// originally planned to have something here but the card class never got complex enough for it
 
 #endif // CARD_CPP

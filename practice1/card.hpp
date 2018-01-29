@@ -3,7 +3,57 @@
 
 #include <iostream>
 
-namespace
+/// cards consist of a suit and a rank as members.
+/// Both are represented through enumerated labels.
+
+enum Suit
+{
+    Spades,
+    Clubs,
+    Hearts,
+    Diamonds,
+};
+
+enum Rank
+{
+    Ace,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+};
+
+const int CARDS = 52;
+const int RANKS = 13;
+const int SUITS = 4;
+
+class Card
+{
+private:
+    // card members
+    Suit suit;
+    Rank face;
+public:
+    // constructors, initializes both members which can then no longer be modified
+    Card(Suit s, Rank r) : suit(s), face(r) {}
+    // Card(int s, int r) : suit(static_cast<Suit>(s)), face(static_cast<Rank>(r)) {}
+
+    // getter functions present but no setter functions
+    // members are view-only after initialization, as is the case for real cards
+    Suit getSuit() {return suit;}
+    Rank getRank() {return face;}
+};
+
+/// old code (ignore)
+/*namespace
 {
     extern const int SUITS;
     extern const int SUITS = 4; // total number of card suits
@@ -100,7 +150,7 @@ public:
 
     void setValue(int newValue) {valueID = newValue;} // see previous
     void setValue(std::string newValue) {valueID = ::getValueInternal(newValue);}
-};
+};*/
 
 
 #endif // CARD_HPP
