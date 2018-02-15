@@ -17,7 +17,7 @@ Player Specifications:
 				- Clergy
 				- Noblemen
 				- Soldiers
-			- Town buildings and assets, in the following categories:
+			- Town buildings and assets owned, in the following categories:
 				- Marketplaces
 				- Mills
 				- Palaces
@@ -28,19 +28,55 @@ Player Specifications:
 				- Income
 				- Justice
 			- Player’s rank
+			- Current year (1400-1450)
 		- Functions that get called between turns to modify some of the above values based on others:
-			- Receive tax revenue
+			- Receive tax revenue 
+				- Depends on tax rates
+				- Personal wealth increases
 			- Economy grows or shrinks
+				- Higher population can lead to higher economic growth
+				- Results in more wealth for the townspeople and more tax revenue in the future
+				- High taxes can restrict current economic growth though
 			- People die, get born, immigrate, or leave
-			- Grain gets eaten by rats (random event)
-			- Invaded by neighboring nation (random event)
+				- Depends on grain released
+				- Serfs will move in if more grain released than minimum
+				- Can increase or decrease population size
+			- Grain eaten by rats
+				- Grain reserves decreased certain percentage each turn.
+		- Same as previous, but not guaranteed to happen each turn:
+			- Invaded by neighboring nation
+				- Triggered by other players, doesn’t happen in single-player
+				- Can lose land or soldiers depending on amount of soldiers in your army and the opponent’s
+			- Assets seized to pay debts
+				- Can happen if wealth less than 0
+			- Promoted
+				- Rank increases by one if certain conditions are met
+				- Win game if max rank reached
+			- Die of certain causes
+				- Natural causes random but chance increases in later years
+				- Results in game over
 		- Functions encompassing decisions that players make during turns that can affect the above members and functions:
+			- (Mostly self-explanatory in above context)
 			- Raise or lower taxes
 			- Release grain
+				- Certain percentage of grain reserves has to be distributed each turn serf consumption
+				- More grain released means less death rate and higher population growth
+				- New serfs will also move in if you have enough grain
+				- Releasing too much means you’ll deplete the reserves for future turns though
 			- Buy assets
+			- Buy grain or land
 			- Draft serfs into the army
+				- Convert of some of the serf population into soldiers
+				- Increases military strength but less economic output
 			- View status and standings (no effect on game itself)
+				- View ranks, wealth, population sizes, and land owned for each player
+			- Invade other player’s city-state
+				- 
+				- Only possible in multiplayer when other players are available to invade
 - 
 
 Game Flow:
--
+- Start with
+
+
+
