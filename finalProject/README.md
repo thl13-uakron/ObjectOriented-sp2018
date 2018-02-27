@@ -3,12 +3,13 @@ Game Elements and Abstractions:
 Player Specifications:
 	- On an abstract level, the player is the ruler of medieval town in Europe.
 	- Code-wise, the Player class consists their game stats as members, dividable into the following categories :
-		- Personal stats, chosen at the start, remain unchanged:
+		- Member vars for personal stats; chosen at start of game, entered into class constructor, and remain unchanged:
 			- Their name
 			- Their gender
+			- Game difficulty
 			- Which player they are (p1, p2, etc.)
 			- The name of the town they rule (based on the above)
-		- Stats representing the town’s status, set to default values at the start and change with each turn and player decision:
+		- Stats representing the town’s status; set to default values with object construction and change with each turn and player decision:
 			- Grain reserves, price, and demand
 			- Land owned, land prices
 			- Gold in treasury
@@ -28,11 +29,14 @@ Player Specifications:
 				- Income
 				- Justice
 			- Player’s rank
-			- Current year (1400-1450)
+				- Total of six possible values for ranks, players start at lowest one by default
 		- Functions that get called between turns to modify some of the above values based on others:
 			- Receive tax revenue 
 				- Depends on tax rates
 				- Personal wealth increases
+			- Receive grain harvest
+				- Depends on serf population
+				- Increases size of grain reserves
 			- Economy grows or shrinks
 				- Higher population can lead to higher economic growth
 				- Results in more wealth for the townspeople and more tax revenue in the future
@@ -43,6 +47,9 @@ Player Specifications:
 				- Can increase or decrease population size
 			- Grain eaten by rats
 				- Grain reserves decreased certain percentage each turn.
+			- Pay expenses
+				- Upkeep for army and assets
+			- (Higher difficulty increases death rates, prices, and resource loss while decreasing revenue and growth rates)
 		- Same as previous, but not guaranteed to happen each turn:
 			- Invaded by neighboring nation
 				- Triggered by other players, doesn’t happen in single-player
@@ -51,9 +58,11 @@ Player Specifications:
 				- Can happen if wealth less than 0
 			- Promoted
 				- Rank increases by one if certain conditions are met
+				- Each rank promotion contains a requirement for
 				- Win game if max rank reached
 			- Die of certain causes
 				- Natural causes random but chance increases in later years
+				- 
 				- Results in game over
 		- Functions encompassing decisions that players make during turns that can affect the above members and functions:
 			- (Mostly self-explanatory in above context)
@@ -76,7 +85,47 @@ Player Specifications:
 - 
 
 Game Flow:
-- Start with
+- Before game starts:
+	- User receives Y/N prompt for instructions 
+	- Display instructions depending on response and move on
+- Game setup:
+	- Start by asking the amount of players (min 1, max 6)
+	- Prompt each player for starting information:
+		- Player name
+		- Town name
+		- Gender
+		- Difficulty
+	- Initialize vector of player classes using input as constructors
+- Repeating turn structure:
+	- Done for each player, starting with the first one in the vector
+	- Start by displaying effects of guaranteed events that take place before turn starts
+		- Rats eat portion of grain reserves
+		- Receive grain harvest from serfs
+		- Receive tax revenue
+		- Serfs get born, die, move in, or leave
+		- Economy grows or shrinks
+	- Display series of action menus that allow player to make purchases and decision with relevant stats being showed
+	- First allows player to make basic goods transactions
+		- Buy or sell grain
+		- Buy or sell land
+		- Demand, current reserve, and price for both are displayed along with player’s gold
+		- Following decision, player gets another input prompt for quantity
+		- Menu repeats after each action until player chooses option to continue
+	- Buying assets (buildings)
+		-
+	- Releasing grain
+		-
+	- Other administrative decisions
+		- Adjust taxes
+		- Draft serf into the army
+		- Invade neighbors
+	- Game process for handling debt:
+		-
+- Ending conditions:
+	- Game ends if one player wins or all players lose
+		- Lose the game by dying
+		- Win the game by reaching max rank
+	- (See previous sections for details)
 
 
 
