@@ -61,11 +61,21 @@ public:
     bool operator<=(Rational& r) const {return !(*this > r);} // shortcut
 
     // input/output operators
-    std::istream operator>>(std::istream i);
-    std::ostream operator<<(std::ostream o);
+    std::istream operator>>(std::istream& i);
+    std::ostream operator<<(std::ostream& o);
 };
 
+std::istream Rational::operator>>(std::istream& i)
+{
+    i >> numerator >> denominator;
+    // return i;
+}
 
+std::ostream Rational::operator<<(std::ostream& o)
+{
+    o << numerator << '/' << denominator;
+    // return o;
+}
 
 int main()
 {
