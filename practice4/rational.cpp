@@ -61,23 +61,28 @@ public:
     bool operator<=(Rational& r) const {return !(*this > r);} // shortcut
 
     // input/output operators
-    std::istream operator>>(std::istream& i);
-    std::ostream operator<<(std::ostream& o);
+    friend std::istream operator>>(std::istream& i, Rational& r);
+    friend std::ostream operator<<(std::ostream& o, Rational& r);
 };
 
-std::istream Rational::operator>>(std::istream& i)
+std::istream operator>>(std::istream& i, Rational& r)
 {
-    i >> numerator >> denominator;
+    i >> r.numerator; // input: take the numerator and denominator seperated by a slash
+    i.ignore(INT_MAX, '/');
+    i >> r.denominator;
     // return i;
 }
 
-std::ostream Rational::operator<<(std::ostream& o)
+std::ostream operator<<(std::ostream& o, Rational& r)
 {
-    o << numerator << '/' << denominator;
+    o << r.numerator << '/' << r.denominator; // output: display the rational as a fraction in the form numerator/denominator
     // return o;
 }
 
 int main()
 {
+    Rational r;
+    std::cin >> r;
+    std::cout << '\n' << r;
     return 0;
 }
