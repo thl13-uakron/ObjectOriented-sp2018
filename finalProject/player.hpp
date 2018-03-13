@@ -103,7 +103,16 @@ Player class abstraction details (copied from README.md file)
                 - Assets can get seized to pay off debts if wealth falls below 0
 
         - Rank/scoring system and game-over conditions
-            -
+            - 7 possible ranks, with the player starting at the lowest one
+            - Each rank is attached to a title that gets displayed with the player's name in the game output
+                - Male titles: Sir, Baron, Count, Marquis, Duke, Grand Duke, Prince, King
+                - Female titles: Lady, Baroness, Countess, Marquise, Duchess, Grand Duchess, Princess, Queen
+            - To rank up, a certain score must be reached
+                - Score calculated with formula involving land, population, assets, and gold
+            - The player wins the game once they reach the highest rank
+            - If a certain amount of years pass before the player wins, they die and lose the game
+                - Death year randomly chosen between a minimum and maximum value
+                - (somewhat unsophisticated implementation, can get changed later)
 
         - Constant parameters and bounds for game behavior (defined out-of-class)
             - Default values for in-game stats (section 2)
@@ -139,9 +148,14 @@ Player class abstraction details (copied from README.md file)
             - Buy/Sell land
             - Buy/Sell grain
             - Buy assets
+            - Invade neighbors
             - Release grain (required)
         - In-game events
-            -
+            - Resource gain (income, harvest)
+            - Resource loss (expenses, rats)
+            - Price adjustments (grain, land)
+            - Population changes (births, deaths, migration)
+            - Bankruptcy
         - Game-ending conditions
             - Rank system
             - Score system
@@ -157,7 +171,7 @@ Player class abstraction details (copied from README.md file)
 namespace
 {
     /// typedefs
-    using int16 = short int; // for int objects not requiring more than 60000 values
+    using int16 = short int; // for int objects not requiring more than ~60000 values
     using int8 = unsigned char; // for int objects not requiring more than 256 values
 
     /// set of default values to initialize player in-game stats to
@@ -238,6 +252,7 @@ namespace
     // other in-game parameters
     const int16 MIN_LAND = 5000; // minimum amount of land you have to keep when selling
     const int16 BANKRUPTCY_LIMIT = -10000; // minimum amount of gold allowed before bankruptcy is declared
+    const int16 BANKRUPTCY_BENEFITS = 100; // amount of gold the player's treausy gets set to following bankruptcy
 
     // meta-game parameters
     const int8 MIN_DIFFICULTY = 1;
@@ -255,13 +270,16 @@ namespace
 }
 
 enum Gender {Male, Female}; // player gender represented with enum values to make higher-level usage easier
+int16 random(int16 minVal, int16 maxVal) {return (rand() % maxVal) + minVal;} // helper function to get random numbers (will be moved to different file later)
 
 class Player
 {
 private:
+    static int8 numPlayers; // measures total number of player objects, incremented with constructor, decremented with destructor
+
     /// first set of members denoted in the abstraction details - personal stats
-    // basic identifying info that's mostly independent from gameplay and game flow (aside of the difficulty member)
-    // member values here are initialized by constructor and don't have any methods for further mutation
+    /// basic identifying info that's mostly independent from gameplay and game flow (aside of the difficulty member)
+    /// member values here are initialized by constructor and don't have any methods for further mutation
 
     std::string name;
     std::string townName;
@@ -275,60 +293,106 @@ public:
     // member values in this section are the only ones determined by constructor input
     // all others are assigned to default values
     Player() = default; // default constructor, included for sake of good practice
-    Player(std::string n, std::string tn, int pNum, int diff, Gender gender) // "main" constructor, takes input for all the above members and assigns accordingly
-    : name(n), townName(tn), playerDetails(pNum | diff << 3 | gender << 5) {}
+    Player(std::string n, std::string tn, int8 diff, Gender gender) // "main" constructor, takes input for all the above members and assigns accordingly
+    : name(n), townName(tn), playerDetails(++numPlayers | diff << 3 | gender << 5) {}
+    Player(std::string n, std::string tn, int8 diff) // "abbreviated" constructor only takes input for name, townName, and difficulty, gender assigned randomly
+    : name(n), townName(tn), playerDetails(++numPlayers | diff << 3 | random(Male, Female) << 5) {}
+    Player(std::string n, std::string tn) // further-shortened version that only needs input for name and town name
+    : name(n), townName(tn), playerDetails(++numPlayers | random(MIN_DIFFICULTY, MAX_DIFFICULTY) << 3 | random(Male, Female) << 5) {}
+    ~Player() {--numPlayers;}
 
     // public accessor functions for usage in program output
     std::string getName() {return name;}
     std::string getTownName() {return townName;}
 
-    int8 playerNumBits() {return (playerDetails & 0b000111);}
+    int8 getPlayerNum() {return (playerDetails & 0b000111);}
     int8 getDifficulty() {return (playerDetails & 0b011000) >> 3;}
     Gender getGender() {return static_cast<Gender>((playerDetails & 0b100000) >> 5);}
 
 private:
     /// second set of members denoted in the abstraction details - in-game stats
-    // all the variables that the gameplay and game mechanics center around (aside of score and endgame stuff)
-    // initialized to default values at construction, values get modified indirectly through events and decisions (functions defined in next section)
+    /// all the variables that the gameplay and game mechanics center around (aside of score and endgame stuff)
+    /// initialized to default values at construction, values get modified indirectly through events and decisions (functions defined in next section)
 
+    // basic stuff that doesn't really fit into any other category
     int gold = STARTING_GOLD; // amount of gold in the player's town treasury. gold is used to buy assets and pay expenses
     int16 year = STARTING_YEAR; // current in-game year, increases by one at the end of each turn
 
     /// implementation for townspeople
+    // townspeople all represented solely in terms of current population (no other relevant shared attributes to warrant making a struct)
+    // implementation of unique serf and soldier behavior can be found in the game functions
+
+    // the "main" people in the town, core to gameplay and game flow
     int16 serfs = STARTING_SERFS; // attracted by surplus grain distribution, form the majority of the population and the backbone of the town, produce yearly grain harvests but no tax revenue
     // affected heavily by births, deaths, and migration between turns unlike other people, good management of grain required to maintain population
     int16 soldiers = STARTING_SOLDIERS; // can be drafted from the serf population, require yearly payments in gold, mainly used as part of the invasion mechanic
+
+    // wealthy taxpayer classes brought in by asset purchases, relatively generic behavior patterns
     int16 merchants = STARTING_MERCHANTS; // attracted by markets, generate moderate amount of taxable customs and sales revenue
     int16 clergy = STARTING_CLERGY; // attracted by cathedrals, generate moderate amount of taxable customs revenue
     int16 nobles = STARTING_NOBLES; // attracted by palaces, generate large amounts of taxable revenue in all categories
-    // townspeople all represented solely in terms of current population
 
-    /// implementation for goods and assets
-    // data structure to represent buyable assets in the player's town, consists of the owned quantity and the cost in gold to buy more
-    struct Asset
+    /// implementation for goods
+    // essential items that can be bought, sold, or consumed in bulk
+    struct Commodity // data structure, consists of the owned quantity, the cost in gold to buy more, and the displayed name of the good
     {
         int owned;
-        const int16 price;
+        int8 price; // prices can flunctuate, generally don't exceed 100-200
+        const std::string name;
+        // other in-game behavior varies, mainly covered in the game functions
     };
 
-    // helper function does basic process of "buying" an asset in the game
-    void buy(Asset product, int quantity)
+    // helper functions do basic processes of "buying" or selling a quantity of goods in the game
+    // intended for indirect usage (called by other member functions in the public access)
+    void buy(Commodity product, int quantity);
+    // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0
+    // post: increase commodity's owned quantity by quantity parameter, decrease gold by quantity times price, display results in program output to inform user
+    void sell(Commodity product, int quantity);
+    // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0 and less than the owned product quantity
+    // post: decrease commodity's owned quantity by quantity parameter, increase gold by quantity times price, display results in program output to inform user
+    void adjustPrice(Commodity product);
+    // pre: player object intialized, commodity parameter is member of object
+    // post: changes the price member of the commodity to a randomized value
+
+    // grain implementation
+    Commodity grain = {STARTING_GRAIN, GRAIN_PRICE, "grain"}; // grain is required to feed the town's population, which can grow or starve depending on the amount it gets access to
+    int releasedGrain = 0; // how much of the grain reserves the player distributes to the townspeople, set to half the starting grain for the first turn
+    int16 grainDemand() {return serfs * 10;} // how much grain is needed to feed the population
+
+    // land implementation
+    Commodity land = {STARTING_LAND, LAND_PRICE, "land"}; // land is needed for
+
+    /// implementation for assets
+    // set of high-value in-game investments that serve similar, generic purposes of attracting tax-paying citizens and/or generating monthly revenu
+    struct Asset // data structure, consists of prices, owned quantity, displayed name, and behavior parameters
     {
-        product.owned += quantity;
-        gold -= quantity * product.price;
-    } // intended for indirect usage (called by other member functions in the public access)
+        int16 owned;
+        const int16 price; // asset prices tend to be constant
+        const std::string name;
 
-    // essential commodities that can be bought, sold or consumed in bulk
-    Asset grain = {STARTING_GRAIN, GRAIN_PRICE}; // grain is required to feed the town's population, which can grow or starve depending on the amount it gets access to
-    Asset land = {STARTING_LAND, LAND_PRICE}; // land is needed for
+        // yearly revenue generation
+        const int16 minRevenue;
+        const int16 maxRevenue; // randomly decided between two limits
 
-    // public works: high-value non-disposable assets that serve specialized purposes
-    Asset marketplace = {0, MARKET_PRICE}; // markets bring merchants to the town and generate revenue
-    Asset mill = {0, MILL_PRICE}; // mills don't bring in new people but generate revenue
-    Asset cathedral = {0, CATHEDRAL_PRICE}; // cathedrals bring clergy to the town
-    Asset palace = {0, PALACE_PRICE}; // palaces bring nobles to the town
+        // population growth following purchase
+        const int8 merchantsAttracted; // represent maximum values (can be 0)
+        const int8 clergyAttracted;
+        const int8 noblesAttracted;
+    };
+    // buy function similar to one found above that conducts addtional operations shared among asset objects
+    void buy(Asset building);
+    // pre: player object initialized, asset parameter is member of object, function called by public member of object, player isn't dead, game hasn't ended
+    // post: increase asset's owned quantity by one and deduct the price from the player's gold, increase player's population members based on asset attributes, display results in program output
+    int16 getRevenue(Asset building) const
+    {return building.owned * random(building.minRevenue, building.maxRevenue);} // helper function for getting revenue
+
+    // current implemented types
+    Asset marketplace = {0, MARKET_PRICE, "market", MIN_MARKET_REVENUE, MAX_MARKET_REVENUE, 10, 0, 0}; // markets bring merchants to the town and generate revenue
+    Asset mill = {0, MILL_PRICE, "mill", MIN_MILL_REVENUE, MAX_MILL_REVENUE, 0, 0, 0}; // mills don't bring in new people but generate revenue
+    Asset cathedral = {0, CATHEDRAL_PRICE, "cathedral", 0, 0, 0, 5, 0}; // cathedrals bring clergy to the town
+    Asset palace = {0, PALACE_PRICE, "palace", 0, 0, 0, 0, 2}; // palaces bring nobles to the town
     // public works are also sources of tax revenue in addition to any income generated on their own
-    short int totalBuildings() {return marketplace.owned + mill.owned + cathedral.owned + palace.owned;} // simple helper function returns total number of town buildings for taxation purposes
+    short int totalAssets() const {return marketplace.owned + mill.owned + cathedral.owned + palace.owned;} // simple helper function returns total number of town buildings for taxation purposes
 
 
     /// implementation for taxes
@@ -346,13 +410,22 @@ private:
     int8 taxJustice = TAX_JUSTICE; // measured on a scale of 1-4, determines strictness of enforcement of taxes, which affects revenue
 
     // helper function with basic formula to determine the income generated by a tax within a year
-    int16 getRevenue(Tax tax)
-    {return (static_cast<float>tax.rate / 100.0) // get the percentage as a decimal
+    int16 getRevenue(Tax tax) const
+    {return (static_cast<float>(tax.rate / 100.0) // get the percentage as a decimal
     * ((tax.merchantRevenue * merchants)
     + (tax.clergyRevenue * clergy)
     + (tax.nobleRevenue * nobles)
-    + (tax.assetRevenue * totalBuildings())
-    + (taxJustice));} // still trying to figure out how tax justice is supposed to get factored in
+    + (tax.assetRevenue * totalAssets())
+    + (taxJustice)));} // still trying to figure out how tax justice is supposed to get factored in
+    // pre: player object initialized, tax object is member of player object
+    // post: return yearly revenue generated by tax as calculated based on tax rates and targets
+
+    // and to change the tax rate
+    void adjustRate(int8 oldRate, int8 newRate, int8 minRate, int8 maxRate);
+    // pre: player object initialized, tax object is member of player object, min rate is lower than max rate, old rate and new rate inside of rate range
+    // post: change the rate member of the tax to the value of the parameter, throws error if outside of range (in case it escapes input validation) (no program output)
+    void adjustRate(int8 oldRate, int8 newRate) {oldRate = newRate;}
+    // alt version of the above with no contract enforcement, easier to use the but less safe
 
     // tax categories implemented in the game
     Tax salesTax = {SALES_TAX, MERCHANT_SALES, CLERGY_SALES, NOBLE_SALES, ASSET_SALES}; // generates revenue from: merchants, nobles, public works
@@ -360,21 +433,165 @@ private:
     Tax customsTax = {CUSTOMS_TAX, MERCHANT_CUSTOMS, CLERGY_CUSTOMS, NOBLE_CUSTOMS, ASSET_CUSTOMS}; // clergy, nobles, merchants, public works
 
 public:
-    /// accessor functions for public usage of above members
+    /// functions for public read-only access to above members
+
+    int getGold() const {return gold;} // gold
+
+    // populations
+    int16 getSerfs() const {return serfs;}
+    int16 getSoldiers() const {return soldiers;}
+    int16 getMerchants() const {return merchants;}
+    int16 getClergy() const {return clergy;}
+    int16 getNobles() const {return nobles;}
+
+    // commodity quantities
+    int getGrain() const {return grain.owned;}
+    int getLand() const {return land.owned;}
+
+    // and prices
+    int8 getGrainPrice() const {return grain.price;}
+    int8 getLandPrice() const {return land.price;}
+
+    // asset quantites
+    int16 getMarkets() const {return marketplace.owned;}
+    int16 getMills() const {return mill.owned;}
+    int16 getCathedrals() const {return cathedral.owned;}
+    int16 getPalaces() const {return palace.owned;}
+
+    // and prices
+    int16 getMarketPrice() const {return marketplace.price;}
+    int16 getMillPrice() const {return mill.price;}
+    int16 getCathedralPrice() const {return cathedral.price;}
+    int16 getPalacePrice() const {return palace.price;}
+
+    // tax rates
+    int8 getSales() const {return salesTax.rate;}
+    int8 getIncome() const {return incomeTax.rate;}
+    int8 getCustoms() const {return customsTax.rate;}
+    int8 getJustice() const {return taxJustice;}
+
 
     /// third set and fourth set of members - gameplay mechanics/decisions
-    // functions representing in-game actions or events that can modify the values in the previous section
-    // prototypes w/ descriptions of preconditions and/or effects for all functions below (detailed definitions written in the implementation file)
+    /// public-access functions representing in-game actions or events that can modify the values in the previous section
+    /// most functions here make use of private member functions, all detailed definitions can be found in implementaiton file
+
+    // buying and selling goods
+    void buyGrain(int16 quantity) {buy(grain, quantity);}
+    void sellGrain(int16 quantity) {sell(grain, quantity);}
+    void buyLand(int16 quantity) {buy(land, quantity);}
+    void sellLand(int16 quantity) {sell(grain, quantity);}
+    // and buying buildings
+    void buyMarket() {buy(marketplace);}
+    void buyMill() {buy(mill);}
+    void buyPalace() {buy(palace);}
+    void buyCathedral() {buy(cathedral);}
+
+    // adjusting taxes
+    void adjustSales(int8 newRate);
+    void adjustIncome(int8 newRate);
+    void adjustCustoms(int8 newRate);
+    void adjustJustice(int8 newVal);
+
+    // invasion
+    void invade(Player* opponent);
+    // pre: two player objects initialized, neither player dead, game hasn't ended
+    // post: both players lose a random number of soldiers, invading player has chance to take land from opponent, results displayed in program output
+
+    // releasing grain
+    void releaseGrain(int quantity);
+    // pre: player object initialized, valied quantity parameter between min and max percentage of releasable grain, player isn't dead, game hasn't ended
+    // post: deducts the parameter member from the player's grain stash and adds it to the stockpile of released grain
+
+    // go bankrupt
+    void bankrupt();
+    // pre: player object initialized, player gold lower than bankruptcy limit, player isn't dead, game hasn't ended
+    // post: player loses all assets in the town and gold gets reset to certain value
+
+private:
+    /// set of functions (w/ helper formulas) that always get called after every turn as part of the game flow
+    /// results can depend on player actions during the turn
+
+    // population changes
+    int16 serfBirths() const;
+    // pre:
+    // post:
+    int16 serfDeaths() const;
+    // pre:
+    // post:
+    int16 serfMigration() const;
+    // pre:
+    // post:
+    void populationChange();
+    // pre: player object initialized, game hasn't ended for player yet, more than 0 grain released
+    // post: take all changes in serf population into effect, display the results and reset released grain to 0
+
+    // receive revenues from taxes
+    int16 getSalesRevenue() const {return getRevenue(salesTax);}
+    int16 getIncomeRevenue() const {return getRevenue(customsTax);}
+    int16 getCustomsRevenue() const {return getRevenue(customsTax);}
+    void receiveTaxRevenue();
+    // pre:
+    // post:
+
+    // and from assets
+    int16 getMarketRevenue() const {return getRevenue(marketplace);}
+    int16 getMillRevenue() const {return getRevenue(mill);}
+    void receiveAssetRevenue();
+    // pre:
+    // post:
+
+    // receive harvest
+    void receiveHarvest();
+    // pre:
+    // post:
+
+    // pay expenses
+    void paySoldiers();
+    // pre:
+    // post:
+
+    // lose resources
+    void ratsEatGrain();
+    // pre:
+    // post:
+
+    // commodity prices change
+    void adjustGrainPrice() {adjustPrice(grain);}
+    void adjustLandPrice() {adjustPrice(land);}
 
 
-    /// last section - rank, scoring, and endgame conditions
-    // two ways for the game to end: reaching the highest rank, with promotions determined based on a scoring system involving all the player's other stats
-    // or dying, which happens in a more-or-less random year if the player hasn't won after a certain amount of years
+    /// last section - rank, scoring, and endgame implementation
+    /// two ways for the game to end for a player: reaching the highest rank (relies on a scoring system to measure player performance) or dying (more-or-less random)
+    /// all void member functions bound to the precondition that the player hasn't reached either ending condition yet
 
-    // rank/title/promotion system implementation:
+    // internal status measurements
+    int8 rankNum = MIN_RANK; // player rank stored internally as a number between 1 and the number of ranks there are
+    int16 deathYear = STARTING_YEAR + random(MIN_LIFESPAN, MAX_LIFESPAN); // game ends for the player in a random in-game year between two parameter limits if they haven't won yet
 
-    // death implementation:
+public:
+    // all public access to rank data
+    std::string getTitle() const; // each rankNum is attached to a title, which varies between the player's gender
+    // pre: player object initialized
+    // post: return the name of the player's in-game rank for program output
+    int getScore() const; // score used to determine increases in rank
+    // pre: player object initialized
+    // post: return the player's game score as determined by a formula involving all of their other stats
+    bool getPromotion() const;
+    // pre: player object initialized
+    // post: checks if player's score is higher than the threshold to reach the next rank, return the results
+    void promote();
+    // pre: player object initialized, game hasn't ended for player yet
+    // post: increases the player's rank if they meet the score requirements, display results in program output
 
+    // endgame conditions (see above)
+    bool won() const {return rankNum == MAX_RANK;}
+    bool dead() const {return year == deathYear;}
+
+    /// combined super-function that comprises of all functions scheduled to get called between game turns
+    /// as well as advancing to the next in-game year and checking if the game has ended (critical to game flow)
+    void turnResults();
+    // pre: player object initialized, game started, player isn't dead and game hasn't ended (yet)
+    // post: calls all functions for events that take place after a player's turn and checks endgame conditions, increments the year, all results displayed in program output
 };
 
 #endif // PLAYER_HPP
