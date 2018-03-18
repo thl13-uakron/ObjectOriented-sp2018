@@ -89,6 +89,21 @@ void Player::buy(Asset building)
         std::cout << name << " buys a "<< building.name
                   << " for " << gold << " gold.\n";
 
+        // get population changes caused by purchase by category
+        int8 newMerchants = random(building.merchantsAttracted);
+        int8 newNobles= random(building.noblesAttracted);
+        int8 newClergy = random(building.clergyAttracted);
+
+        // take changes into effect
+        merchants += newMerchants;
+        clergy += newClergy;
+        nobles += newNobles;
+
+        // display results in program output
+        if (building.merchantsAttracted > 0) std::cout << newMerchants << " merchants move to " << townName << ".\n";
+        if (building.clergyAttracted > 0) std::cout << newClergy << " clergy move to " << townName << ".\n";
+        if (building.merchantsAttracted > 0) std::cout << newNobles << " nobles move to " << townName << ".\n";
+
         // check if purchase has resulted in bankruptcy, act accordingly
         if (isBankrupt()) bankruptcy();
     }
@@ -222,6 +237,8 @@ void Player::populationChange()
     // and for migration
     serfs += serfMigration;
     std::cout << serfMigration << " serfs move to " << townName << ".\n";
+
+    releasedGrain = 0; // reset released grain using it to calculate changes
 }
 
 
