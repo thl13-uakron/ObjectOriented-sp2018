@@ -13,6 +13,14 @@ int random(int maxVal);
 // pre: valid int value greater than or equal to 0 for maxVal
 // post: return random integer between 0 and maxVal
 
+bool rollChance(int num, int denom);
+// pre: valid int values greater than or equal to 1 or num and denom, denom is greater than or equal to num
+// post: randomly return true at the odds of denom:num, returning false otherwise (random chance)
+
+bool rollChance(int denom);
+// pre: valid int value greater than 1 for denom
+// post: randomly return true at the odds of denom:1, returning false otherwise
+
 int intInput(std::string prompt, int minVal, int maxVal);
 // pre: valid string for prompt, valid int values for minVal and maxVal, maxVal greater than or equal to minVal
 // post: display prompt, take and validate integer input between minVal and maxVal until valid value read, return result

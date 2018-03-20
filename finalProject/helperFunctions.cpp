@@ -23,6 +23,26 @@ int random(int maxVal)
     return random(0, maxVal);
 }
 
+bool rollChance(int num, int denom)
+{
+    // num stands for numerator, denom stands for denominator
+    // enforce preconditions
+    if (num < 1 || denom < 1) throw std::logic_error("Function called with parameters lower than allowed range.");
+    if (denom < num) throw std::logic_error("Function called with min parameter greater than max parameter");
+
+    // get random value
+    int result = random(1, denom);
+
+    // match up with odds parameters, return accordingly
+    if (result <= num) return true;
+    return false;
+}
+
+bool rollChance(int denom)
+{
+    return rollChance(1, denom);
+}
+
 int intInput(std::string prompt, int minVal, int maxVal)
 {
     if (minVal > maxVal) throw std::logic_error("Function called with min parameter greater than max parameter."); // enforce precondition
@@ -62,7 +82,7 @@ std::string strInput(std::string prompt, int minLen, int maxLen)
         try
         {
             std::cout << prompt; // display prompt for input
-            std::cin >> input; // take input
+            getline(std::cin, input); // take input
 
             // check if input isn't valid, throw execptions accordingly
             if (input.length() < minLen) throw std::runtime_error("Too short. Please try again.");
