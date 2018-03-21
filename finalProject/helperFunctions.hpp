@@ -21,6 +21,14 @@ bool rollChance(int denom);
 // pre: valid int value greater than 1 for denom
 // post: randomly return true at the odds of denom:1, returning false otherwise
 
+float percent(int p);
+// pre: valid int value greater than 0
+// post: returns int as a decimal percentage
+
+void pressEnterToContinue();
+// pre: N/A
+// post: pauses program until user presses ENTER
+
 int intInput(std::string prompt, int minVal, int maxVal);
 // pre: valid string for prompt, valid int values for minVal and maxVal, maxVal greater than or equal to minVal
 // post: display prompt, take and validate integer input between minVal and maxVal until valid value read, return result

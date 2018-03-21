@@ -16,13 +16,13 @@ namespace
 
     // general stats
     const int16 STARTING_YEAR = 1400;
-    const int16 STARTING_GOLD = 1000;
+    const int16 STARTING_GOLD = 2500;
 
     // prices and starting supply of buyable goods
     const int16 STARTING_GRAIN = 10000;
-    const int8 GRAIN_PRICE = 10;
+    const int8 GRAIN_PRICE = 25;
     const int16 STARTING_LAND = 10000;
-    const int8 LAND_PRICE = 10;
+    const int8 LAND_PRICE = 15;
 
     // defense prices
     const int16 SOLDIER_COST = 50;
@@ -39,7 +39,7 @@ namespace
     const int8 SALES_TAX = 10;
     const int8 INCOME_TAX = 5;
     const int8 CUSTOMS_TAX = 25;
-    const int8 TAX_JUSTICE = 2;
+    const int8 TAX_JUSTICE = 2; // justice not implemented
 
 
     /// value limits and other constant parameters for gameplay (player-end)
@@ -49,7 +49,7 @@ namespace
     const int8 MAX_SALES_TAX = 25;
     const int8 MAX_INCOME_TAX = 50;
     const int8 MAX_CUSTOMS_TAX = 100;
-    const int8 MIN_TAX_JUSTICE = 1;
+    const int8 MIN_TAX_JUSTICE = 1; // justic not implemented
     const int8 MAX_TAX_JUSTICE = 4;
 
     // taxable wealth by population and tax category
@@ -85,11 +85,17 @@ namespace
     const int8 MIN_GRAIN_RELEASE = 20;
     const int8 MAX_GRAIN_RELEASE = 80;
 
+    // price flunctuation by percentage
+    const int8 MIN_PRICE_CHANGE = 70; // limits on the percentage of the current price that commodity prices can change to
+    const int8 MAX_PRICE_CHANGE = 150; // price changes calculated randomly between these two values
+
     // parameters for population changes
-    const int8 GRAIN_DEMAND = 10; // amount of grain needed to feed each serf on normal difficulty without excess deaths
-    const int8 BASE_BIRTH_RATE = 20; // base percentage of the serf population that gets added as births if exact grain demand met
-    const int8 BASE_DEATH_RATE = 15; // base percentage of serf population to get subtracted as deaths if exact grain demand met
-    const int8 MIGRATION_REQ = 25; // amount of excess grain needed to be released for someone to move into the town
+    const int8 GRAIN_DEMAND = 4; // amount of grain needed to feed each serf on normal difficulty without excess deaths
+
+    const int8 BASE_BIRTH_RATE = 15; // base percentage of the serf population that gets added as births if exact grain demand met
+    const int8 BASE_DEATH_RATE = 20; // base percentage of serf population to get subtracted as deaths if exact grain demand met
+
+    const int8 MIGRATION_REQ = 200; // amount of excess grain needed to be released for people to start moving in
 
     // grain harvest limits (by quantity, per serf)
     const int8 MIN_HARVEST = 5;
@@ -99,8 +105,7 @@ namespace
     const int8 MIN_GRAIN_LOSS = 20;
     const int8 MAX_GRAIN_LOSS = 40; // randomly chosen between these two values in-game
 
-    // other in-game parameters
-    const int16 MIN_LAND = 5000; // minimum amount of land you have to keep when selling
+    // bankruptcy parameters
     const int16 BANKRUPTCY_LIMIT = -10000; // minimum amount of gold allowed before bankruptcy is declared
     const int16 BANKRUPTCY_BENEFITS = 100; // amount of gold the player's treausy gets set to following bankruptcy
 
@@ -152,6 +157,17 @@ namespace
 
     // bot behavior
     const int8 BOT_AGGRESSION = 10; // percent chance of a bot invading another player in the game during a turn
+    const int8 BOT_FRUGALITY = 20; // percent chance of a bot to not buy an item that they can afford
+    const int8 BOT_PURCHASES = 2; // amount of attempt a bot will make to call the buy function for each asset
+
+    // purchase limits
+    const int16 SOLDIER_PURCHASE_LIMIT = 100; // highest amount of a commodity one can buy in a single action
+    const int16 GRAIN_PURCHASE_LIMIT = 5000;
+    const int16 LAND_PURCHASE_LIMIT = 2500;
+
+    // sale limits
+    const int16 MIN_LAND = 5000; // minimum amount of a commodity you have to keep when selling
+    const int16 MIN_GRAIN = 2500;
 }
 
 #endif // PARAMETERS_HPP

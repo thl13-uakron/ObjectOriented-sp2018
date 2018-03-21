@@ -8,7 +8,7 @@
 
 int random(int minVal, int maxVal)
 {
-    if (minVal > maxVal) throw std::logic_error("Function called with min parameter greater than max parameter."); // enforce precondition
+    if (minVal > maxVal) throw std::logic_error("Function random() called with min parameter greater than max parameter."); // enforce precondition
 
     // current method (may be changed later)
     int result;
@@ -27,8 +27,8 @@ bool rollChance(int num, int denom)
 {
     // num stands for numerator, denom stands for denominator
     // enforce preconditions
-    if (num < 1 || denom < 1) throw std::logic_error("Function called with parameters lower than allowed range.");
-    if (denom < num) throw std::logic_error("Function called with min parameter greater than max parameter");
+    if (num < 1 || denom < 1) throw std::logic_error("Function rollChance() called with parameter lower than allowed range.");
+    if (denom < num) throw std::logic_error("Function rollChance() called with min parameter greater than max parameter");
 
     // get random value
     int result = random(1, denom);
@@ -43,15 +43,29 @@ bool rollChance(int denom)
     return rollChance(1, denom);
 }
 
+float percent(int p)
+{
+    if (p < 0) throw std::logic_error("Function percent() called with parameter outside of allowed range"); // enforce precondition
+    return static_cast<float>(p / 100.0); // return decimal
+}
+
+void pressEnterToContinue()
+{
+    std::string s;
+    getline(std::cin, s); // initialize a string and call getline on it, leaving the function once the user presses the ENTER key
+}
+
 int intInput(std::string prompt, int minVal, int maxVal)
 {
-    if (minVal > maxVal) throw std::logic_error("Function called with min parameter greater than max parameter."); // enforce precondition
+    if (maxVal < 0) maxVal = 0; // take care of negative values
+    if (minVal > maxVal) throw std::logic_error("Function intInput() called with min parameter greater than max parameter."); // enforce precondition
 
     int input; // input variable
     do
     {
         try
         {
+            // std::cin.clear();
             std::cout << prompt; // display prompt for input
             std::cin >> input; // take input
 
@@ -65,23 +79,25 @@ int intInput(std::string prompt, int minVal, int maxVal)
         }
         catch (std::runtime_error inputError) // for invalid input:
         {
-            std::cerr << inputError.what(); // display error message
+            std::cerr << inputError.what() << '\n'; // display error message
             std::cin.clear(); // clear input buffer to prepare for second attempt to get valid input
-            std::cin.ignore(INT_MAX);
+            std::cin.ignore(INT_MAX, '\n');
         }
     } while (true); // if input was valid, function should've returned by this point. repeat input process until valid value read
 }
 
 std::string strInput(std::string prompt, int minLen, int maxLen)
 {
-    if (minLen > maxLen) throw std::logic_error("Function called with min parameter greater than max parameter."); // enforce precondition
+    if (minLen > maxLen) throw std::logic_error("Function strInput() called with min parameter greater than max parameter."); // enforce precondition
 
     std::string input; // input string
     do
     {
         try
         {
+            //std::cin.clear();
             std::cout << prompt; // display prompt for input
+             //std::cin.ignore('\n');
             getline(std::cin, input); // take input
 
             // check if input isn't valid, throw execptions accordingly
@@ -93,9 +109,9 @@ std::string strInput(std::string prompt, int minLen, int maxLen)
         }
         catch (std::runtime_error inputError) // for invalid input:
         {
-            std::cerr << inputError.what(); // display error message
+            std::cerr << inputError.what() << '\n'; // display error message
             std::cin.clear(); // clear input buffer to prepare for second attempt to get valid input
-            std::cin.ignore(INT_MAX);
+            std::cin.ignore(INT_MAX, '\n');
         }
     } while (true); // if input was valid, function should've returned by this point. repeat input process until valid value read
 }
@@ -115,13 +131,13 @@ bool ynInput(std::string prompt, char yes, char no)
             if (tolower(input) == tolower(no)) return false;
 
             // if not valid, proceed to throwing exception
-            throw std::runtime_error("Please select one of the two valid options.\n");
+            throw std::runtime_error("Please select one of the two valid options.");
         }
         catch (std::runtime_error inputError) // for invalid input:
         {
-            std::cerr << inputError.what(); // display error message
+            std::cerr << inputError.what() << '\n'; // display error message
             std::cin.clear(); // clear input buffer to prepare for second attempt to get valid input
-            std::cin.ignore(INT_MAX);
+            std::cin.ignore(INT_MAX, '\n');
         }
     } while (true); // if input was valid, function should've returned by this point. repeat input process until valid value read
 }
