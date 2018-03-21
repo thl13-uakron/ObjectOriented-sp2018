@@ -135,7 +135,7 @@ void Player::invade(Player* opponent)
         throw std::logic_error("Error: Game function invade() being called after endgame conditions already reached.");
 
     // placeholder
-    std::cout << getTitle() << ' ' << name << "'s forces invade " << opponent->getTownName() << "!\n"
+    std::cout << '\n' << getTitle() << ' ' << name << "'s forces invade " << opponent->getTownName() << "!\n"
               << "[Invasion mechanic not implemented yet]\n";
 
     int16 invaderCasualties;
@@ -215,7 +215,7 @@ int Player::getSerfBirths() const
 {
     // formula: base amount of births with one extra birth for every (indiv. grain demand * 2) grain released above the total demand
     int baseBirths = getSerfs() * percent(BASE_DEATH_RATE);
-    int bonusBirths = (releasedGrain - grainDemand()) * GRAIN_DEMAND * 2;
+    int bonusBirths = (releasedGrain - grainDemand()) / (GRAIN_DEMAND * 2);
 
     if (bonusBirths < 0) bonusBirths = 0; // take care of negative values
 
@@ -226,7 +226,7 @@ int Player::getSerfDeaths() const
 {
     // formula: base amount of deaths with one extra death for every (indiv. grain demand * 2) grain released below the total demand
     int baseDeaths = getSerfs() * percent(BASE_DEATH_RATE) * diffModifier();
-    int bonusDeaths = (grainDemand() - releasedGrain) * GRAIN_DEMAND * 2;
+    int bonusDeaths = (grainDemand() - releasedGrain) / (GRAIN_DEMAND * 2);
 
     if (bonusDeaths < 0) bonusDeaths = 0; // take care of negative values
     if (bonusDeaths > getSerfs() - baseDeaths) bonusDeaths = getSerfs() - baseDeaths; // take care of excessive values
@@ -377,19 +377,19 @@ std::string Player::getTitle() const
 
 int Player::getScore() const
 {
-    // each stat assigned a weight for calculating score with the total being the sum (difficulty not accounted)
+    // each stat weighed by their "value" in terms of gold for calculating score with the total being the sum (difficulty not accounted, see parameters file for details)
     return (((getGold() - STARTING_GOLD) * 1) // gold
-            + ((getSerfs() - STARTING_SERFS) * 3) // populations
-            + ((getMerchants() - STARTING_MERCHANTS) * 5)
-            + ((getClergy() - STARTING_CLERGY) * 10)
-            + ((getNobles() - STARTING_NOBLES) * 15)
-            + ((getSoldiers() - STARTING_SOLDIERS) * 5)
-            + ((getGrain() - STARTING_GRAIN) * 1) // resources
-            + ((getLand() - STARTING_LAND) * 5)
-            + ((getMarkets() - 0) * 5) // assets
-            + ((getMills() - 0) * 5)
-            + ((getCathedrals()- 0) * 7)
-            + ((getPalaces() - 0) * 10)
+            + ((getSerfs() - STARTING_SERFS) * SERF_VALUE) // populations
+            + ((getMerchants() - STARTING_MERCHANTS) * MERCHANT_VALUE)
+            + ((getClergy() - STARTING_CLERGY) * CLERGY_VALUE)
+            + ((getNobles() - STARTING_NOBLES) * NOBLE_VALUE)
+            + ((getSoldiers() - STARTING_SOLDIERS) * SOLDIER_VALUE)
+            + ((getGrain() - STARTING_GRAIN) * GRAIN_VALUE) // resources
+            + ((getLand() - STARTING_LAND) * LAND_VALUE)
+            + ((getMarkets() - 0) * MARKET_VALUE) // assets
+            + ((getMills() - 0) * MILL_VALUE)
+            + ((getCathedrals()- 0) * CATHEDRAL_VALUE)
+            + ((getPalaces() - 0) * PALACE_VALUE)
             + 1000); // starting score
 }
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-namespace
+namespace /// all constant values affecting in-game behavior, balance, and mechanics can be found here
 {
     /// typedefs
     using int16 = short int; // for int objects not requiring more than ~60000 values
@@ -81,6 +81,11 @@ namespace
     const int8 MAX_MILL_REVENUE = 250;
     // (cathedrals and palaces don't generate direct revenue)
 
+    // population effects from assets
+    const int8 MARKET_MERCHANTS = 25; // random number of people between 0 and these enter the town upon purchase
+    const int8 CATHEDRAL_CLERGY = 5; // values not accounted for here are assumed to be 0
+    const int8 PALACE_NOBLES = 2;
+
     // grain release limits (by percentage)
     const int8 MIN_GRAIN_RELEASE = 20;
     const int8 MAX_GRAIN_RELEASE = 80;
@@ -90,7 +95,7 @@ namespace
     const int8 MAX_PRICE_CHANGE = 150; // price changes calculated randomly between these two values
 
     // parameters for population changes
-    const int8 GRAIN_DEMAND = 4; // amount of grain needed to feed each serf on normal difficulty without excess deaths
+    const int8 GRAIN_DEMAND = 7; // amount of grain needed to feed each serf on normal difficulty without excess deaths
 
     const int8 BASE_BIRTH_RATE = 15; // base percentage of the serf population that gets added as births if exact grain demand met
     const int8 BASE_DEATH_RATE = 20; // base percentage of serf population to get subtracted as deaths if exact grain demand met
@@ -108,6 +113,11 @@ namespace
     // bankruptcy parameters
     const int16 BANKRUPTCY_LIMIT = -10000; // minimum amount of gold allowed before bankruptcy is declared
     const int16 BANKRUPTCY_BENEFITS = 100; // amount of gold the player's treausy gets set to following bankruptcy
+
+    // invasion parameters (soon to be implemented)
+
+
+    /// meta-game parameters (player-end)
 
     // difficulty system parameters
     const int8 MIN_DIFFICULTY = 1;
@@ -140,6 +150,19 @@ namespace
     {"Prince", "Princess", 0},
     {"King", "Queen", 0}}; // top rank (index = vector size)
 
+    // score parameters
+    const int16 SERF_VALUE= 50;
+    const int16 MERCHANT_VALUE = 100;
+    const int16 CLERGY_VALUE = 350;
+    const int16 NOBLE_VALUE = 500;
+    const int16 SOLDIER_VALUE = SOLDIER_COST + SOLDIER_PAY;
+    const int16 GRAIN_VALUE = GRAIN_PRICE;
+    const int16 LAND_VALUE = LAND_PRICE * 2;
+    const int16 MARKET_VALUE = MARKET_PRICE;
+    const int16 MILL_VALUE = MILL_PRICE;
+    const int16 CATHEDRAL_VALUE = CATHEDRAL_PRICE;
+    const int16 PALACE_VALUE = PALACE_PRICE;
+
 
     /// meta-game parameters (game-end)
 
@@ -156,9 +179,9 @@ namespace
     "Mozzarella", "Proscuitto", "Rotini", "Alfredo", "Pesto"};
 
     // bot behavior
-    const int8 BOT_AGGRESSION = 10; // percent chance of a bot invading another player in the game during a turn
-    const int8 BOT_FRUGALITY = 20; // percent chance of a bot to not buy an item that they can afford
-    const int8 BOT_PURCHASES = 2; // amount of attempt a bot will make to call the buy function for each asset
+    const int8 BOT_AGGRESSION = 20; // percent chance of a bot invading another player in the game during a turn
+    const int8 BOT_FRUGALITY = 40; // percent chance of a bot to not buy an item that they can afford during a purchase attempt
+    const int8 BOT_PURCHASES = 3; // amount of attempt a bot will make to call the buy function for each asset
 
     // purchase limits
     const int16 SOLDIER_PURCHASE_LIMIT = 100; // highest amount of a commodity one can buy in a single action
