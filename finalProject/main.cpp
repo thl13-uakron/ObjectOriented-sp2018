@@ -364,6 +364,7 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
             std::cout << "";
 
             // pause output before returning to menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
             pressEnterToContinue("(Press ENTER to continue)");
             break;
         case 8:
@@ -427,6 +428,7 @@ void goodsMenu(Player* player)
             std::cout << "";
 
             // pause output before returning to action menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
             pressEnterToContinue("(Press ENTER to continue)");
             break;
         case 6:
@@ -528,6 +530,7 @@ void taxMenu(Player* player)
             std::cout << "";
 
             // pause output before returning to action menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
             pressEnterToContinue("(Press ENTER to continue)");
             break;
         case 5:
@@ -577,6 +580,7 @@ void invasionMenu(Player* currentPlayer, playerVector players, playerVector bots
             std::cout << "";
 
             // pause output before returning to action menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
             pressEnterToContinue("(Press ENTER to continue)");
             break;
         }
@@ -638,6 +642,7 @@ void grainRelease(Player* player)
             std::cout << "";
 
             // pause output quickly before returning to action menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
             pressEnterToContinue("(Press ENTER to continue)");
             break;
         default:
