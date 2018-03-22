@@ -415,7 +415,7 @@ public:
     void buyGrain(int16 quantity) {buy(grain, quantity);}
     void sellGrain(int16 quantity) {sell(grain, quantity);}
     void buyLand(int16 quantity) {buy(land, quantity);}
-    void sellLand(int16 quantity) {sell(grain, quantity);}
+    void sellLand(int16 quantity) {sell(land, quantity);}
     // and buying soldiers
     void buySoldiers(int16 quantity) {buy(soldiers, quantity);}
     // and buying buildings
@@ -426,8 +426,8 @@ public:
 
     // adjusting taxes
     void adjustSales(int8 newRate) {adjustRate(salesTax.rate, newRate, MIN_TAX, MAX_SALES_TAX);}
-    void adjustIncome(int8 newRate) {adjustRate(salesTax.rate, newRate, MIN_TAX, MAX_INCOME_TAX);}
-    void adjustCustoms(int8 newRate) {adjustRate(salesTax.rate, newRate, MIN_TAX, MAX_CUSTOMS_TAX);}
+    void adjustIncome(int8 newRate) {adjustRate(incomeTax.rate, newRate, MIN_TAX, MAX_INCOME_TAX);}
+    void adjustCustoms(int8 newRate) {adjustRate(customsTax.rate, newRate, MIN_TAX, MAX_CUSTOMS_TAX);}
     // void adjustJustice(int8 newVal) {adjustRate(taxJustice, newVal, MIN_TAX_JUSTICE, MAX_TAX_JUSTICE);}
 
     // invasion

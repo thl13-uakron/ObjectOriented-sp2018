@@ -87,8 +87,8 @@ namespace /// all constant values affecting in-game behavior, balance, and mecha
     const int8 PALACE_NOBLES = 2;
 
     // grain release limits (by percentage)
-    const int8 MIN_GRAIN_RELEASE = 20;
-    const int8 MAX_GRAIN_RELEASE = 80;
+    const int16 MIN_GRAIN_RELEASE = 20;
+    const int16 MAX_GRAIN_RELEASE = 80;
 
     // price flunctuation by percentage
     const int8 MIN_PRICE_CHANGE = 70; // limits on the percentage of the current price that commodity prices can change to
@@ -97,8 +97,10 @@ namespace /// all constant values affecting in-game behavior, balance, and mecha
     // parameters for population changes
     const int8 GRAIN_DEMAND = 7; // amount of grain needed to feed each serf on normal difficulty without excess deaths
 
-    const int8 BASE_BIRTH_RATE = 15; // base percentage of the serf population that gets added as births if exact grain demand met
-    const int8 BASE_DEATH_RATE = 20; // base percentage of serf population to get subtracted as deaths if exact grain demand met
+    const int8 MIN_BIRTH_RATE = 10; // base percentage of the serf population that gets added as births if exact grain demand met (calculated randomly between two parameters)
+    const int8 MAX_BIRTH_RATE = 20;
+    const int8 MIN_DEATH_RATE = 15; // base percentage of serf population to get subtracted as deaths if exact grain demand met (calculated randomly between two paramters)
+    const int8 MAX_DEATH_RATE = 25;
 
     const int8 MIGRATION_REQ = 200; // amount of excess grain needed to be released for people to start moving in
 

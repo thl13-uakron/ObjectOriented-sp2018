@@ -23,7 +23,7 @@ void Player::buy(Commodity& product, int quantity)
 
     int totalCost = quantity * getPrice(product); // get cost of purchase
 
-    if (gold > totalCost || // do quick check to see if player can afford purchase, ask if they'd like to proceed in case that it puts them in debt
+    if (gold > totalCost || quantity == 0 || // do quick check to see if player can afford purchase, ask if they'd like to proceed in case that it puts them in debt
         ynInput("You're buying more than you can afford. Proceed with purchase anyways? (y/n) ", 'y', 'n'))
     {
         // continue with purchase
@@ -218,7 +218,7 @@ void Player::bankruptcy()
 int Player::getSerfBirths() const
 {
     // formula: base amount of births with one extra birth for every (indiv. grain demand * 2) grain released above the total demand
-    int baseBirths = getSerfs() * percent(BASE_DEATH_RATE);
+    int baseBirths = random(getSerfs() * percent(MIN_BIRTH_RATE), getSerfs() * percent(MAX_BIRTH_RATE)); // base amount calculated between random parameters
     int bonusBirths = (releasedGrain - grainDemand()) / (GRAIN_DEMAND * 2);
 
     if (bonusBirths < 0) bonusBirths = 0; // take care of negative values
@@ -229,7 +229,7 @@ int Player::getSerfBirths() const
 int Player::getSerfDeaths() const
 {
     // formula: base amount of deaths with one extra death for every (indiv. grain demand * 2) grain released below the total demand
-    int baseDeaths = getSerfs() * percent(BASE_DEATH_RATE) * diffModifier();
+    int baseDeaths = random(getSerfs() * percent(MIN_DEATH_RATE), getSerfs() * percent(MAX_DEATH_RATE)); // base amount calculated between random parameters
     int bonusDeaths = (grainDemand() - releasedGrain) / (GRAIN_DEMAND * 2);
 
     if (bonusDeaths < 0) bonusDeaths = 0; // take care of negative values
@@ -337,7 +337,7 @@ int Player::getHarvest()
 {
     // formula: serf population multiplied by random value between two parameters, divided by difficulty modifier
     // might change this to a more sophisticated formula later
-    return getSerfs() * random(MIN_HARVEST, MAX_HARVEST) / diffModifier();
+    return random(getSerfs() * MIN_HARVEST, getSerfs() * MAX_HARVEST) / diffModifier();
 }
 
 void Player::receiveHarvest()
@@ -382,14 +382,14 @@ std::string Player::getTitle() const
 int Player::getScore() const
 {
     // each stat weighed by their "value" in terms of gold for calculating score with the total being the sum (difficulty not accounted, see parameters file for details)
-    return (((getGold() - STARTING_GOLD) * 1) // gold
-            + ((getSerfs() - STARTING_SERFS) * SERF_VALUE) // populations
-            + ((getMerchants() - STARTING_MERCHANTS) * MERCHANT_VALUE)
-            + ((getClergy() - STARTING_CLERGY) * CLERGY_VALUE)
-            + ((getNobles() - STARTING_NOBLES) * NOBLE_VALUE)
-            + ((getSoldiers() - STARTING_SOLDIERS) * SOLDIER_VALUE)
-            + ((getGrain() - STARTING_GRAIN) * GRAIN_VALUE) // resources
-            + ((getLand() - STARTING_LAND) * LAND_VALUE)
+    return (((getGold()/* - STARTING_GOLD*/) * 1) // gold
+            + ((getSerfs()/* - STARTING_SERFS*/) * SERF_VALUE) // populations
+            + ((getMerchants() /*- STARTING_MERCHANTS*/) * MERCHANT_VALUE)
+            + ((getClergy()/* - STARTING_CLERGY*/) * CLERGY_VALUE)
+            + ((getNobles()/* - STARTING_NOBLES*/) * NOBLE_VALUE)
+            + ((getSoldiers()/* - STARTING_SOLDIERS*/) * SOLDIER_VALUE)
+            + ((getGrain()/* - STARTING_GRAIN*/) * GRAIN_VALUE) // resources
+            + ((getLand()/* - STARTING_LAND*/) * LAND_VALUE)
             + ((getMarkets() - 0) * MARKET_VALUE) // assets
             + ((getMills() - 0) * MILL_VALUE)
             + ((getCathedrals()- 0) * CATHEDRAL_VALUE)
