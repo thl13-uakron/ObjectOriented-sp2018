@@ -80,7 +80,7 @@ void Player::buy(Asset building)
     int totalCost = getPrice(building); // get cost of purchase
 
     if (gold > totalCost || // do quick check to see if player can afford purchase, ask if they'd like to proceed in case that it puts them in debt
-        ynInput("You're buying more than you can afford. Proceed with purchase anyways? (y/n) ", 'y', 'n'))
+        ynInput("This costs more than you can afford. Proceed with purchase anyways? (y/n) ", 'y', 'n'))
     {
         // continue with purchase
         ++building.owned;
@@ -90,24 +90,28 @@ void Player::buy(Asset building)
         std::cout << name << " buys a "<< building.name
                   << " for " << totalCost << " gold.\n";
 
-        // get population changes caused by purchase by category
-        int16 newMerchants = random(building.merchantsAttracted);
-        int16 newNobles= random(building.noblesAttracted);
-        int16 newClergy = random(building.clergyAttracted);
-
-        // take changes into effect
-        merchants += newMerchants;
-        clergy += newClergy;
-        nobles += newNobles;
-
-        // display results in program output
-        if (newMerchants > 0) std::cout << newMerchants << " merchants move to " << townName << ".\n";
-        if (newClergy > 0) std::cout << newClergy << " clergy move to " << townName << ".\n";
-        if (newNobles > 0) std::cout << newNobles << " nobles move to " << townName << ".\n";
-
         // check if purchase has resulted in bankruptcy, act accordingly
         if (isBankrupt()) bankruptcy();
     }
+}
+
+void Player::attractCitizens(Asset building)
+{
+    // get quantities based on formula (high tax rates can decrease migration)
+    int newMerchants = (random(building.owned * building.merchantsAttracted) / (taxLevel() > diffModifier() ? taxLevel() : diffModifier()));
+    int newClergy = (random(building.owned * building.clergyAttracted) / (getCustoms() / CUSTOMS_TAX > diffModifier() ? getCustoms() / CUSTOMS_TAX : diffModifier());
+    int newNobles = (random(building.owned * building.noblesAttracted) / (taxLevel() > diffModifier() ? taxLevel() : diffModifier()));
+    // higher taxes will decrease the amount of people who are willing to move in, lower taxes have the opposite affect but only up to (1 / diffModifier)
+
+    // take effects into account
+    merchants += newMerchants;
+    clergy += newClergy;
+    nobles += newNobles;
+
+    // display results
+    if (newMerchants > 0) std::cout << building.owned << " " << building.name << "s bring " << newMerchants << " new merchants to "<< townName << ".\n";
+    if (newClergy > 0) std::cout << building.owned << " " << building.name << "s bring " << newClergy << " new clergy to " << townName << ".\n";
+    if (newClergy > 0) std::cout << building.owned << " " << building.name << "s bring " << newNobles << " new nobles to " << townName << ".\n";
 }
 
 
@@ -261,7 +265,13 @@ void Player::populationChange()
     serfs += serfMigration;
     std::cout << serfMigration << " serfs move to " << townName << ".\n";
 
-    releasedGrain = 0; // reset released grain using it to calculate changes
+    releasedGrain = 0; // reset released grain using it to calculate changes for serfs
+
+    // get population changes for tax-paying citizens attracted by town buildings
+    attractCitizens(marketplace);
+    attractCitizens(mill);
+    attractCitizens(cathedral);
+    attractCitizens(palace);
 }
 
 
