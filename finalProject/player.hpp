@@ -63,7 +63,7 @@ Player class abstraction details (copied from README.md file)
 				- More grain released means less death rate and higher population growth
 				- Releasing too much means you'll deplete the reserves for future turns though
 			- Buy assets
-                - People can move into the town upon purchase (details in prev. section)
+                - People can move into the town each turn for each building owned (details in prev. section)
 			- Buy grain or land
             - Sell grain or land
                 - Must keep a minimum amount
@@ -263,14 +263,14 @@ private:
 
     // helper functions do basic processes of "buying" or selling a quantity of goods in the game
     // intended for indirect usage (called by other member functions in the public access)
-    void buy(Commodity product, int quantity);
+    void buy(Commodity& product, int quantity);
     // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0
     // post: increase commodity's owned quantity by quantity parameter, decrease gold by quantity times price, display results in program output to inform user
     // inform player if purchase would put them into debt and check if player has become bankrupt from purchase
-    void sell(Commodity product, int quantity);
+    void sell(Commodity& product, int quantity);
     // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0 and less than the owned product quantity
     // post: decrease commodity's owned quantity by quantity parameter, increase gold by quantity times price, display results in program output to inform user
-    void adjustPrice(Commodity product);
+    void adjustPrice(Commodity& product);
     // pre: player object intialized, commodity parameter is member of object
     // post: changes the price member of the commodity to a randomized value
 
@@ -305,7 +305,7 @@ private:
     int16 getPrice(Asset building) const {return building.basePrice * diffModifier();}
 
     // buy function similar to one found above that conducts addtional operations shared among asset objects
-    void buy(Asset building);
+    void buy(Asset& building);
     // pre: player object initialized, asset parameter is member of object, function called by public member of object, player isn't dead, game hasn't ended
     // post: increase asset's owned quantity by one and deduct the price from the player's gold, increase player's population members based on asset attributes, display results in program output
     // inform player if purchase would put them into debt and check if player has become bankrupt from purchase
@@ -327,8 +327,6 @@ private:
     Asset mill = {0, MILL_PRICE, "mill", MIN_MILL_REVENUE, MAX_MILL_REVENUE, 0, 0, 0}; // mills don't bring in new people but generate revenue
     Asset cathedral = {0, CATHEDRAL_PRICE, "cathedral", 0, 0, 0, CATHEDRAL_CLERGY, 0}; // cathedrals bring clergy to the town
     Asset palace = {0, PALACE_PRICE, "palace", 0, 0, 0, 0, PALACE_NOBLES}; // palaces bring nobles to the town
-
-
 
     /// implementation for taxes
     // data structure consisting of all the relevant attributes in a tax
@@ -362,8 +360,8 @@ private:
     Tax customsTax = {CUSTOMS_TAX, MERCHANT_CUSTOMS, CLERGY_CUSTOMS, NOBLE_CUSTOMS, ASSET_CUSTOMS}; // clergy, nobles, merchants, public works
 
     // relative taxation rates compared to starting values
-    float taxLevel()
-    {return static_cast<float>(salesTax.rate + incomeTax.rate + customsTax.rate) / (SALES_TAX + INCOME_TAX + CUSTOMS_TAX)}
+    float taxLevel() // used to calculate adverse effects on migration
+    {return static_cast<float>(salesTax.rate + incomeTax.rate + customsTax.rate) / (SALES_TAX + INCOME_TAX + CUSTOMS_TAX);}
 
 public:
     /// functions for public read-only access to above members

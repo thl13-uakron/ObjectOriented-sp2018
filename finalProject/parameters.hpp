@@ -82,7 +82,7 @@ namespace /// all constant values affecting in-game behavior, balance, and mecha
     // (cathedrals and palaces don't generate direct revenue)
 
     // population effects from assets
-    const int8 MARKET_MERCHANTS = 25; // random number of people between 0 and these enter the town upon purchase
+    const int8 MARKET_MERCHANTS = 25; // random number of people between 0 and these enter the town per turn per building
     const int8 CATHEDRAL_CLERGY = 5; // values not accounted for here are assumed to be 0
     const int8 PALACE_NOBLES = 2;
 

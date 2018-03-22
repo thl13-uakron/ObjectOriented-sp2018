@@ -12,7 +12,7 @@ int8 Player::numPlayers = 0; // static variable definition
 
 /// buyable goods and assets
 
-void Player::buy(Commodity product, int quantity)
+void Player::buy(Commodity& product, int quantity)
 {
     // enforce general void preconditions
     if (gameEnded())
@@ -39,7 +39,7 @@ void Player::buy(Commodity product, int quantity)
     }
 }
 
-void Player::sell(Commodity product, int quantity)
+void Player::sell(Commodity& product, int quantity)
 {
     // enforce general void preconditions
     if (gameEnded())
@@ -61,7 +61,7 @@ void Player::sell(Commodity product, int quantity)
               << " for " << earnings << " gold.\n";
 }
 
-void Player::adjustPrice(Commodity product)
+void Player::adjustPrice(Commodity& product)
 {
     // enforce general void preconditions
     if (gameEnded())
@@ -71,7 +71,7 @@ void Player::adjustPrice(Commodity product)
     std::cout << "The price of " << product.name <<  " in " << townName << " has changed to " << getPrice(product) <<" gold.\n"; // display results in program output
 }
 
-void Player::buy(Asset building)
+void Player::buy(Asset& building)
 {
     // enforce general void preconditions
     if (gameEnded())
@@ -99,7 +99,7 @@ void Player::attractCitizens(Asset building)
 {
     // get quantities based on formula (high tax rates can decrease migration)
     int newMerchants = (random(building.owned * building.merchantsAttracted) / (taxLevel() > diffModifier() ? taxLevel() : diffModifier()));
-    int newClergy = (random(building.owned * building.clergyAttracted) / (getCustoms() / CUSTOMS_TAX > diffModifier() ? getCustoms() / CUSTOMS_TAX : diffModifier());
+    int newClergy = (random(building.owned * building.clergyAttracted) / (getCustoms() / CUSTOMS_TAX > diffModifier() ? getCustoms() / CUSTOMS_TAX : diffModifier()));
     int newNobles = (random(building.owned * building.noblesAttracted) / (taxLevel() > diffModifier() ? taxLevel() : diffModifier()));
     // higher taxes will decrease the amount of people who are willing to move in, lower taxes have the opposite affect but only up to (1 / diffModifier)
 
@@ -109,9 +109,9 @@ void Player::attractCitizens(Asset building)
     nobles += newNobles;
 
     // display results
-    if (newMerchants > 0) std::cout << building.owned << " " << building.name << "s bring " << newMerchants << " new merchants to "<< townName << ".\n";
-    if (newClergy > 0) std::cout << building.owned << " " << building.name << "s bring " << newClergy << " new clergy to " << townName << ".\n";
-    if (newClergy > 0) std::cout << building.owned << " " << building.name << "s bring " << newNobles << " new nobles to " << townName << ".\n";
+    if (newMerchants > 0) std::cout << newMerchants << " merchants come to "<< townName << ".\n";
+    if (newClergy > 0) std::cout << newClergy << " clergy come to " << townName << ".\n";
+    if (newClergy > 0) std::cout << newNobles << " nobles come to " << townName << ".\n";
 }
 
 
@@ -266,12 +266,6 @@ void Player::populationChange()
     std::cout << serfMigration << " serfs move to " << townName << ".\n";
 
     releasedGrain = 0; // reset released grain using it to calculate changes for serfs
-
-    // get population changes for tax-paying citizens attracted by town buildings
-    attractCitizens(marketplace);
-    attractCitizens(mill);
-    attractCitizens(cathedral);
-    attractCitizens(palace);
 }
 
 
@@ -441,9 +435,6 @@ void Player::turnResults()
     // take all the functions scheduled to get called after a player's turn
     // and call all of them by category
 
-    std::cout << "\nCensus: \n";
-    populationChange();
-
     std::cout << "\nFinances: \n";
     receiveTaxRevenue();
     receiveAssetRevenue();
@@ -456,6 +447,16 @@ void Player::turnResults()
     std::cout << "\nEconomy: \n";
     adjustGrainPrice();
     adjustLandPrice();
+
+    std::cout << "\nCensus (Taxpayers): \n";
+    attractCitizens(marketplace);
+    attractCitizens(mill);
+    attractCitizens(cathedral);
+    attractCitizens(palace);
+
+    std::cout << "\nCensus (Serfs): \n";
+    populationChange();
+
     std::cout << "\n"; // formatting
 
     // check if player should get promoted following stat changes¦°hgž

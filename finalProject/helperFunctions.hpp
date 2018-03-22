@@ -25,6 +25,10 @@ float percent(int p);
 // pre: valid int value greater than 0
 // post: returns int as a decimal percentage
 
+void pressEnterToContinue(std::string prompt);
+// pre: valid string parameter
+// post: displays prompt, pauses program until user presses ENTER
+
 void pressEnterToContinue();
 // pre: N/A
 // post: pauses program until user presses ENTER

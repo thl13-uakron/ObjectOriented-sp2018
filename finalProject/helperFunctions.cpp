@@ -53,6 +53,15 @@ void pressEnterToContinue()
 {
     std::string s;
     getline(std::cin, s); // initialize a string and call getline on it, leaving the function once the user presses the ENTER key
+    std::cout << '\n';
+}
+
+void pressEnterToContinue(std::string prompt)
+{
+    std::cout << prompt; // same as above except it displays a prompt first
+    std::string s;
+    getline(std::cin, s);
+    std::cout << '\n;'
 }
 
 int intInput(std::string prompt, int minVal, int maxVal)

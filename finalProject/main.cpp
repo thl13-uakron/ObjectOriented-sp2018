@@ -153,8 +153,25 @@ int main()
             break;
         case 2:
             // display instructions
-            std::cout << "\nInstructions: \n"
-                      << "\n";
+            std::cout << "\n\nINSTRUCTIONS\n"
+                      << "Overview: \n"
+                      << "- In Santa Paravia and Fiumancco, you play as the ruler of an Italian city-state circa 1400.\n"
+                      << "- Trade goods and invest in assets to accumulate wealth while keeping your people fed and defending from invasions.\n"
+                      << "- Good management of wealth and resources will allow your town to grow and prosper.\n"
+                      << "Controls: \n"
+                      << "- As a text-based game, most of the controls in Santa Paravia are fairly straightfoward.\n"
+                      << "- You will be given a series of text menus and input prompts to make decisions from.\n"
+                      << "- Explanations for the implications of individual decisions will be available as they are shown to you.\n"
+                      << "How to win: \n"
+                      << "- Your score is calculated as an approximation of the total wealth in your town relative to when you started.\n"
+                      << "- This is measured in terms of population and resources and assets owned in addition to the gold in your treasury.\n"
+                      << "- On higher difficulties, poor financial decisions will result in you losing score, so act carefully to maximize returns.\n"
+                      << "- By reaching a sufficiently high score, you can earn progressively more prestigious titles.\n"
+                      << "- Reaching the rank of king or queen will allow you to win the game, but you get limited time to do this before your character dies.\n"
+                      << "- AI-controlled bots will also be competing against you for the throne, so watch out.\n";
+
+            std::cin.ignore(INT_MAX, '\n');
+            pressEnterToContinue("\n(Press ENTER to return to menu)"); // pause program output before displaying menu again
             break;
         case 3:
             // display credits
@@ -166,7 +183,10 @@ int main()
                       << "Graphics: \n"
                       << "N/A\n"
                       << "Sound: \n"
-                      << "N/A\n\n";
+                      << "N/A\n";
+
+            std::cin.ignore(INT_MAX, '\n');
+            pressEnterToContinue("\n(Press ENTER to return to menu)"); // pause program output before displaying menu again
             break;
         case 4:
             // exit program if user chose to quit
@@ -236,9 +256,8 @@ void playGame(playerVector players, playerVector bots)
                 if (gameOver(players)) break; // check ending conditions afterwards
 
                 // have the user press a key to continue to the next turn to avoid to much output being displayed at once
-                std::cout << "Turn completed. (Press ENTER to continue)";
                 std::cin.ignore(INT_MAX, '\n');
-                pressEnterToContinue();
+                pressEnterToContinue("Turn completed. (Press ENTER to continue)");
                 std::cout << "\n";
             }
         }
@@ -255,8 +274,7 @@ void playGame(playerVector players, playerVector bots)
                 if (b->won()) break; // bots can win the game
 
                 // have the user press a key to continue to the next turn to avoid to much output being displayed at once
-                std::cout << "Turn completed. (Press ENTER to continue)";
-                pressEnterToContinue();
+                pressEnterToContinue("\nTurn completed. (Press ENTER to continue)");
                 std::cout << "\n";
             }
         }
@@ -269,6 +287,8 @@ void playGame(playerVector players, playerVector bots)
     for (Player* p : players) p->printStats();
     std::cout << "\nBots: \n";
     for (Player* b : bots) b->printStats();
+    pressEnterToContinue("\n(Press ENTER to return to menu)");
+    std::cout << '\n';
 }
 
 bool gameOver(playerVector players)
@@ -291,12 +311,12 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
         currentPlayer->printStats();
 
         // and menu choices
-        std::cout << "Administrative Options: \n"
+        std::cout << "Administrative Decisions: \n"
                   << "[1] Buy Goods\n"
                   << "[2] Buy Soldiers\n"
                   << "[3] Buy Assets\n"
                   << "[4] Adjust Taxes\n"
-                  << "[5] Invade\n"
+                  << "[5] Invade Rivals\n"
                   << "[6] View Standings\n"
                   << "[7] Help\n"
                   << "[8] End Turn\n";
@@ -309,9 +329,12 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
             goodsMenu(currentPlayer);
             break;
         case 2:
-            // directly prompt player to make purchase (not enough available options to warrant a dedicated menu
-            std::cout << "\nCurrent Gold: " << currentPlayer->getGold(); // display relevant info (gold, soldier price, soldier pay)
-            std::cout << " Cost per Soldier: " << currentPlayer->getSoldierPrice() << " (Yearly Upkeep: " << currentPlayer->getSoldierPay() << ")";
+            // display relevant info (gold, soldiers owned, soldier price, soldier pay)
+            std::cout << "\nCurrent Gold: " << currentPlayer->getGold();
+            std::cout << "\nSoldiers Owned: " << currentPlayer->getSoldiers();
+            std::cout << ", Cost per Soldier: " << currentPlayer->getSoldierPrice() << "g (Yearly Upkeep: " << currentPlayer->getSoldierPay() << "g)\n";
+
+            // directly prompt player to make purchase (not enough available options to warrant a dedicated menu)
             currentPlayer->buySoldiers(intInput("How many soldiers would you like to buy? (max "
                                                 + std::to_string(SOLDIER_PURCHASE_LIMIT) + " per purchase, buy 0 to cancel) ",
                                                  0, SOLDIER_PURCHASE_LIMIT)); // purchase volume restricted to prevent mass debt-purchases
@@ -339,6 +362,9 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
         case 7:
             // display helper instructions
             std::cout << "";
+
+            // pause output before returning to menu so player can see instruction text
+            pressEnterToContinue("(Press ENTER to continue)");
             break;
         case 8:
             // exit function, proceed with game
@@ -354,10 +380,61 @@ void goodsMenu(Player* player)
     do
     {
         // display relevant header info (gold, grain prices, grain owned, land prices, land owned)
+        std::cout << "\nCurrent Gold: " << player->getGold() // display relevant info (gold, soldiers owned, soldier price, soldier pay)
+                  << "\nGrain Owned: " << player->getGrain()
+                  << ", Grain Price: " << player->getGrainPrice() << "g"
+                  << "\nLand Owned:" << player->getLand()
+                  << ", Land Price: " << player->getLandPrice() << "g\n";
 
         // display choices
+        std::cout << "\nOptions: \n"
+                  << "[1] Buy Grain\n"
+                  << "[2] Buy Land\n"
+                  << "[3] Sell Grain\n"
+                  << "[4] Sell Land\n"
+                  << "[5] Help\n"
+                  << "[6] Back\n";
 
         // take user choice, call operations accordingly
+        switch(intInput("Select an option: ", 1, 6))
+        {
+        case 1:
+            // prompt player to buy grain, take and validate input
+            player->buyGrain(intInput("How much grain would you like to buy? (max "
+                                     + std::to_string(GRAIN_PURCHASE_LIMIT) + " per purchase, buy 0 to cancel) ",
+                                     0, GRAIN_PURCHASE_LIMIT)); // purchase volume restricted to prevent excessive debt-purchases
+            break;
+        case 2:
+            // prompt player to buy land, take and validate input
+            player->buyLand(intInput("How much land would you like to buy? (max "
+                                     + std::to_string(LAND_PURCHASE_LIMIT) + " per purchase, buy 0 to cancel) ",
+                                     0, LAND_PURCHASE_LIMIT)); // purchase volume restricted to prevent mass debt-purchases
+            break;
+        case 3:
+            // prompt player to sell grain, take and validate input
+            player->sellGrain(intInput("How much grain would you like to sell? (must keep "
+                                     + std::to_string(MIN_GRAIN) + ", sell 0 to cancel) ", // player must keep a minimum amount of land
+                                      0, (player->getGrain() > MIN_GRAIN ? player->getGrain() - MIN_GRAIN : 0))); // conditional operator to allow player to sell 0 without causing errors
+            break;
+        case 4:
+            // prompt player to sell land, take and validate input
+            player->sellLand(intInput("How much land would you like to sell? (must keep "
+                                     + std::to_string(MIN_LAND) + ", sell 0 to cancel) ", // player must keep a minimum amount of land
+                                      0, (player->getLand() > MIN_LAND ? player->getLand() - MIN_LAND : 0))); // conditional operator to allow player to sell 0 without causing errors
+            break;
+        case 5:
+            // display help
+            std::cout << "";
+
+            // pause output before returning to action menu so player can see instruction text
+            pressEnterToContinue("(Press ENTER to continue)");
+            break;
+        case 6:
+            // exit menu, return to game menu
+            return;
+        default:
+            throw std::logic_error("Invalid menu input received."); // throw exception if input not accounted for
+        }
     } while (true); // menu loop only terminates if user chooses to go back
 }
 
@@ -366,10 +443,50 @@ void assetMenu(Player* player)
     do
     {
         // display relevant header info (gold)
+        std::cout << "\nCurrent Gold: " << player->getGold() << "\n";
 
         // display choices
+        std::cout << "\nOptions: \n"
+                  << "[1] Buy Market (" << player->getMarketPrice() << "g)\n" // prices shown alongside purchase option
+                  << "[2] Buy Mill (" << player->getMillPrice() << "g)\n"
+                  << "[3] Buy Palace ("<<  player->getPalacePrice() << "g)\n"
+                  << "[4] Buy Cathedral (" << player->getCathedralPrice() << "g)\n"
+                  << "[5] Help\n"
+                  << "[6] Back\n";
 
         // take user choice, call operations accordingly
+        switch(intInput("Select an option: ", 1, 6))
+        {
+        case 1:
+            // call function to buy market
+            player->buyMarket();
+            break;
+        case 2:
+            // call function to buy mill
+            player->buyMill();
+            break;
+        case 3:
+            // call function to buy palace
+            player->buyPalace();
+            break;
+        case 4:
+            // call function to buy cathedral
+            player->buyCathedral();
+            break;
+        case 5:
+            // display help
+            std::cout << "";
+
+            // pause output before returning to action menu so player can see instruction text
+            std::cin.ignore(INT_MAX, '\n');
+            pressEnterToContinue("(Press ENTER to continue)");
+            break;
+        case 6:
+            // exit menu, return to game menu
+            return;
+        default:
+            throw std::logic_error("Invalid menu input received."); // throw exception if input not accounted for
+        }
     } while (true); // menu loop only terminates if user chooses to go back
 }
 
@@ -378,20 +495,102 @@ void taxMenu(Player* player)
     do
     {
         // display choices
+        std::cout << "\nOptions: \n"
+                  << "[1] Adjust Sales Tax (Current Rate: " << player->getSales() << "%)\n" // current prices shown alongside adjustment option
+                  << "[2] Adjust Income Tax (Current Rate: " << player->getIncome() << "%)\n"
+                  << "[3] Adjust Customs Duty (Current Rate: "<<  player->getCustoms() << "%)\n"
+                  << "[4] Help\n"
+                  << "[5] Back\n";
 
         // take user choice, call operations accordingly
+        switch(intInput("Select an option: ", 1, 5))
+        {
+        case 1:
+            // prompt player to adjust sales tax within range, take and validate input
+            player->adjustSales(intInput("Enter the new sales tax rate (min " + std::to_string(MIN_TAX) +
+                                        ", max " + std::to_string(MAX_SALES_TAX) + "): ",
+                                         MIN_TAX, MAX_SALES_TAX));
+            break;
+        case 2:
+            // prompt player to adjust income tax within range, take and validate input
+            player->adjustIncome(intInput("Enter the new income tax rate (min " + std::to_string(MIN_TAX) +
+                                        ", max " + std::to_string(MAX_INCOME_TAX) + "): ",
+                                         MIN_TAX, MAX_INCOME_TAX));
+            break;
+        case 3:
+            // prompt player to adjust customs duty within range, take and validate input
+            player->adjustCustoms(intInput("Enter the new customs duty rate (min " + std::to_string(MIN_TAX) +
+                                        ", max " + std::to_string(MAX_CUSTOMS_TAX) + "): ",
+                                         MIN_TAX, MAX_CUSTOMS_TAX));
+            break;
+        case 4:
+            // display help
+            std::cout << "";
+
+            // pause output before returning to action menu so player can see instruction text
+            pressEnterToContinue("(Press ENTER to continue)");
+            break;
+        case 5:
+            // exit menu, return to game menu
+            return;
+        default:
+            throw std::logic_error("Invalid menu input received."); // throw exception if input not accounted for
+        }
     } while (true); // menu loop only terminates if user chooses to go back
 }
 
 void invasionMenu(Player* currentPlayer, playerVector players, playerVector bots)
 {
+    playerVector targets; // menu options can differ based on circumstances
+    // essentially consist of all players and bots that aren't dead and aren't the current player
+    for (Player* p : players) if (!p->dead() && p != currentPlayer) targets.push_back(p);
+    for (Player* b : bots) if (!b->dead()) targets.push_back(b);
+
+    // record indexes for options for other optioms 2
+    const int help = targets.size() + 1;
+    const int cancel = targets.size() + 2;
+
     do
     {
-        // display relevant header info (gold, soldiers, list of other players)
+        // display relevant header info (gold, soldiers)
+        std::cout << "\nCurrent Gold: " << currentPlayer->getGold()
+                  << "\nSoldiers Owned: " << currentPlayer->getSoldiers() << "\n";
 
         // display choices
+        std::cout << "\nOptions:\n"; //
+        for (int i = 0; i < targets.size(); ++i)
+        {
+            std::cout << "[" << i + 1 << "] Invade "
+                      << targets[i]->getTitle() << " " << targets[i]->getName() << " of " << targets[i]->getTownName()
+                      << " (" << targets[i]->getSoldiers() << " soldiers)\n";
+        } // options to get help and return to game menu
+        std::cout << "[" << help << "] Help\n"
+                  << "[" << cancel << "] Back\n";
+
+
 
         // take user choice, call operations accordingly
+        int choice = intInput("Select an option: ", 1, targets.size() + 2);
+        if (choice == help)
+        {
+            // display help if player chose to do so
+            std::cout << "";
+
+            // pause output before returning to action menu so player can see instruction text
+            pressEnterToContinue("(Press ENTER to continue)");
+            break;
+        }
+        else if (choice == cancel)
+        {
+            // exit function if player chose to go back
+            return;
+        }
+        else
+        {
+            // invade specified target otherwise
+            currentPlayer->invade(targets[choice - 1]);
+            break;
+        }
     } while (true); // menu loop only terminates if user chooses to go back
 }
 
@@ -399,12 +598,51 @@ void grainRelease(Player* player)
 {
     do
     {
-        // display relevant header info (gold, grain, grain demand)
+        // display relevant header info (grain, grain demand)
+        std::cout << "\nDistribute Grain for Consumption\n"
+                  << "Current Reserve: " << player->getGrain()
+                  << "\n" << player->grainDemand() << " grain will be needed to feed " << player->getTownName() << "'s population this year.\n";
 
         // display choices
+        std::cout << "\nOptions: \n"
+                  << "[1] Release Minimum Amount (" << MIN_GRAIN_RELEASE << "% - " << player->minRelease() << ")\n"
+                  << "[2] Release Maximum Amount (" << MAX_GRAIN_RELEASE << "% - " << player->maxRelease() << ")\n"
+                  << "[3] Release Other Amount\n"
+                  << "[4] Buy More Grain\n"
+                  << "[5] Help\n";
 
         // take user choice, call operations accordingly
-        return;
+        switch(intInput("Select an option: ", 1, 5))
+        {
+        case 1:
+            // release minimum amount
+            player->releaseGrain(player->minRelease());
+            return;
+        case 2:
+            // release maximum amount
+            player->releaseGrain(player->maxRelease());
+            return;
+        case 3:
+            // take and validate input for how much to release
+            player->releaseGrain(intInput("Enter the amount to release: ", player->minRelease(), player->maxRelease()));
+            return;
+        case 4:
+            // show prompt for player to buy grain along with relevant info, take and valdiate input
+            std::cout << "Current Gold: " << player->getGold() << ", Grain Price: " << player->getGrainPrice() << "g\n";
+            player->buyGrain(intInput("How much would you like to buy? (max "
+                                     + std::to_string(GRAIN_PURCHASE_LIMIT) + " per purchase, buy 0 to cancel) ",
+                                     0, GRAIN_PURCHASE_LIMIT));
+            break;
+        case 5:
+            // display help
+            std::cout << "";
+
+            // pause output quickly before returning to action menu so player can see instruction text
+            pressEnterToContinue("(Press ENTER to continue)");
+            break;
+        default:
+            throw std::logic_error("Invalid menu input received."); // throw exception if input not accounted for
+        }
     } while (true); // menu loop terminates if player chooses option other than help or buy more grain(will return)
 }
 
@@ -416,6 +654,9 @@ void botActions(Player* bot, playerVector players, playerVector bots)
     std::cout << "\nYear " << bot->getYear() << " (Turn " << bot->getYear() - STARTING_YEAR + 1 << ")\n";
     bot->printStats();
 
+    // quick break in program output
+    pressEnterToContinue("(Press ENTER to continue)");
+
     // bot randomly buys goods within allowed range if they have more than 0 gold
     if (bot->getGold() > 0)
     {
@@ -423,12 +664,13 @@ void botActions(Player* bot, playerVector players, playerVector bots)
         bot->buyLand(random((LAND_PURCHASE_LIMIT < bot->getGold() / bot->getLandPrice() ? LAND_PURCHASE_LIMIT : (bot->getGold() / bot->getLandPrice()) - 1)) * (1 - percent(BOT_FRUGALITY)));
         bot->buySoldiers(random((SOLDIER_PURCHASE_LIMIT < bot->getGold() / bot->getSoldierPrice() ? SOLDIER_PURCHASE_LIMIT : (bot->getGold() / bot->getSoldierPrice()) - 1)) * (1 - percent(BOT_FRUGALITY)));
         // random value goes up to purchase limit if they can afford it, highest affordable amount otherwise
+        std::cout << '\n'; // formatting
     }
 
-
     // randomly sells goods within allowed range
-    if (bot->getGrain() > MIN_GRAIN) bot->sellGrain(random(bot->getGrain() - MIN_GRAIN - 1));
-    if (bot->getLand() > MIN_LAND) bot->sellLand(random(bot->getLand() - MIN_LAND - 1));
+    if (bot->getGrain() > MIN_GRAIN) bot->sellGrain(random(bot->getGrain() - MIN_GRAIN - 1) * (1 - percent(BOT_FRUGALITY)));
+    if (bot->getLand() > MIN_LAND) bot->sellLand(random(bot->getLand() - MIN_LAND - 1) * (1 - percent(BOT_FRUGALITY)));
+    std::cout << '\n'; // formatting
 
     // buys assets if they have more than 0 gold and pass a chance roll
     for (int i = 0; i < BOT_PURCHASES; ++i) // makes three attempts to buy each asset
@@ -437,7 +679,13 @@ void botActions(Player* bot, playerVector players, playerVector bots)
         if (bot->getGold() > bot->getMillPrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyMill();
         if (bot->getGold() > bot->getCathedralPrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyCathedral();
         if (bot->getGold() > bot->getPalacePrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyPalace();
+        std::cout << '\n'; // formatting
     }
+
+    // adjusts tax rates to random amounts within range
+    bot->adjustSales(random(MAX_SALES_TAX));
+    bot->adjustIncome(random(MAX_INCOME_TAX));
+    bot->adjustCustoms(random(MAX_CUSTOMS_TAX));
 
     // random chance to invade random-chosen other player or bot
     if (rollChance(BOT_AGGRESSION, 100)) // roll
@@ -451,10 +699,14 @@ void botActions(Player* bot, playerVector players, playerVector bots)
         {
             bot->invade(bots[targetIndex % players.size()]);
         }
+        std::cout << '\n'; // formatting
     }
 
     // release random amount of grain
     bot->releaseGrain(random(bot->minRelease(), bot->maxRelease()));
+
+    // quick break in program output
+    pressEnterToContinue("(Press ENTER to continue)");
 
     // receive year-end report
     bot->turnResults();
