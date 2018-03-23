@@ -6,7 +6,7 @@ Purpose: Write a text-based version of Santa Paravia using C++ and object-orient
 
 /*
 Game Flow details (Copied from README.md file)
-    - Main menu with four options display before game starts:
+    - Main menu with four options displayed before game starts:
         - Play the game
             - Selecting this option leads to game setup
         - Display instructions
@@ -80,6 +80,12 @@ Game Flow details (Copied from README.md file)
             - Lose the game by dying
             - Win the game by reaching max rank
     - Return to main menu after game ends, program can be exited by selecting the "quit" option
+*/
+
+/*
+Changes from 2000 C version:
+    - Front-end
+    - Back-end
 */
 
 #include <iostream>
@@ -258,7 +264,6 @@ void playGame(playerVector players, playerVector bots)
                 // have the user press a key to continue to the next turn to avoid to much output being displayed at once
                 std::cin.ignore(INT_MAX, '\n');
                 pressEnterToContinue("Turn completed. (Press ENTER to continue)");
-                std::cout << "\n";
             }
         }
         if (gameOver(players)) break;
@@ -274,8 +279,7 @@ void playGame(playerVector players, playerVector bots)
                 if (b->won()) break; // bots can win the game
 
                 // have the user press a key to continue to the next turn to avoid to much output being displayed at once
-                pressEnterToContinue("\nTurn completed. (Press ENTER to continue)");
-                std::cout << "\n";
+                pressEnterToContinue("Turn completed. (Press ENTER to continue)");
             }
         }
 
@@ -361,7 +365,10 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
             break;
         case 7:
             // display helper instructions
-            std::cout << "";
+            std::cout << "This the main game menu from which you can make most of your decisions.\n"
+                      << "If this is your first time playing, take the time to look"
+                      << "though each of your options to see what's available for you to do.\n"
+                      << "Once you're done, select the End Turn option to proceed to the next step.\n";
 
             // pause output before returning to menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -384,7 +391,7 @@ void goodsMenu(Player* player)
         std::cout << "\nCurrent Gold: " << player->getGold() // display relevant info (gold, soldiers owned, soldier price, soldier pay)
                   << "\nGrain Owned: " << player->getGrain()
                   << ", Grain Price: " << player->getGrainPrice() << "g"
-                  << "\nLand Owned:" << player->getLand()
+                  << "\nLand Owned: " << player->getLand()
                   << ", Land Price: " << player->getLandPrice() << "g\n";
 
         // display choices
@@ -425,7 +432,14 @@ void goodsMenu(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "";
+            std::cout << "Here you can make bulk purchases and sales of goods and "
+                      << "resources that serve essential purposes for your town: "
+                      << "- Grain is needed to feed your serfs and prevent them from starving. They'll produce some on their "
+                      << " own each turn but you might need to buy extra in case of a poor harvest\n"
+                      << "- Land mainly serves as a measure of your town's power and counts extra towards your score "
+                      << "though it doesn't have any other uses implemented yet.\n"
+                      << "On higher difficulties, goods sell for less than what you buy them for, "
+                      << "so make each transaction count.";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -477,7 +491,13 @@ void assetMenu(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "";
+            std::cout << "Assets are long-term investments that can generate revenue over time, "
+                      << "either directly or by attracting tax-paying citizens to your town each turn.\n"
+                      << "- Markets create a small amount of yearly revenue and can bring merchants to the town.\n"
+                      << "- Mills create a moderate amount of yearly revenue.\n"
+                      << "- Palaces can bring nobles to the town.\n"
+                      << "- Cathedrals can bring clergy to the town.\n"
+                      << "In case of bankruptcy, your assets will be seized by creditors so be careful.\n";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -527,7 +547,13 @@ void taxMenu(Player* player)
             break;
         case 4:
             // display help
-            std::cout << "";
+            std::cout << "Taxes represent the main source of your yearly income, "
+                      << "with each tax getting its revenue from different sources:\n"
+                      << "- Sales: merchants, nobles, and assets\n"
+                      << "- Income: nobles and assets\n"
+                      << "- Customs: merchants, clergy, nobles, and assets\n"
+                      << "Higher tax rates allow you to earn more revenue, but "
+                      << "will make potential taxpayers less willing to move to your town.\n";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -577,7 +603,12 @@ void invasionMenu(Player* currentPlayer, playerVector players, playerVector bots
         if (choice == help)
         {
             // display help if player chose to do so
-            std::cout << "";
+            std::cout << "If you're tired of having to buy and manage your own resources, you "
+                      << "can use your soldiers to attempt to seize grain, land, or assets "
+                      << "by force from any of the other players in the game.  \n"
+                      << "The defenders will fight back, though, so be sure to invest well enough "
+                      << "into your army to ensure a successful invasion.\n"
+                      << "You can buy soldiers from the turn menu if you need more. \n";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -639,7 +670,14 @@ void grainRelease(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "";
+            std::cout << "While tax-paying citizens can eat on their own paycheck, "
+                      << "your serfs rely on you to release a portion of your grain reserves "
+                      << "each year in order to keep them fed.\n"
+                      << "Not meeting the demand will result in serfs starving to death, while exceeding "
+                      << "it will increase birth rates and spur migration to your town.\n"
+                      << "Don't release too much, though, or you might have trouble replenishing"
+                      << "your reserves in later turns.\n"
+                      << "If you need more grain, you can buy some here.\n";
 
             // pause output quickly before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -656,7 +694,7 @@ void botActions(Player* bot, playerVector players, playerVector bots)
     // current AI behavior for each bot
 
     // display stats header
-    std::cout << "\nYear " << bot->getYear() << " (Turn " << bot->getYear() - STARTING_YEAR + 1 << ")\n";
+    std::cout << "Year " << bot->getYear() << " (Turn " << bot->getYear() - STARTING_YEAR + 1 << ")\n";
     bot->printStats();
 
     // quick break in program output
@@ -684,8 +722,10 @@ void botActions(Player* bot, playerVector players, playerVector bots)
         if (bot->getGold() > bot->getMillPrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyMill();
         if (bot->getGold() > bot->getCathedralPrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyCathedral();
         if (bot->getGold() > bot->getPalacePrice() && !rollChance(BOT_FRUGALITY, 100)) bot->buyPalace();
-        std::cout << '\n'; // formatting
     }
+
+    // formatting
+    std::cout << '\n';
 
     // adjusts tax rates to random amounts within range
     bot->adjustSales(random(MAX_SALES_TAX));
