@@ -64,10 +64,10 @@ private:
 public:
     // constructors
     UnionCard() = default; // default
-    UnionCard(UnionCard uc) : sc(uc.sc), jc(uc.jc), type(uc.type){} // copy
-    UnionCard(StandardCard s) : sc(s), type(Standard) {} // standard
+    UnionCard(const UnionCard& uc) : sc(uc.sc), jc(uc.jc), type(uc.type){} // copy
+    UnionCard(StandardCard& s) : sc(s), type(Standard) {} // standard
     UnionCard(Rank r, Suit s) : sc(r, s), type(Standard) {}
-    UnionCard(JokerCard j) : jc(j), type(Joker) {} // joker
+    UnionCard(JokerCard& j) : jc(j), type(Joker) {} // joker
     UnionCard(Color c) : jc(c), type(Joker) {}
 
     // accessors:
@@ -105,22 +105,78 @@ private:
 public:
     // constructors
     BitCard() = default; // default
-    BitCard(BitCard bc) : cardData(bc.cardData) {} // copy
-    BitCard(StandardCard sc) : cardData(Standard << 7 | sc.suit << 4 | sc.rank) {} // standard card
+    BitCard(const BitCard& bc) : cardData(bc.cardData) {} // copy
+    BitCard(StandardCard& sc) : cardData(Standard << 7 | sc.getSuit() << 4 | sc.getRank()) {} // standard card
     BitCard(Rank r, Suit s) : cardData(Standard << 7 | s << 4 | r) {} // standard card members
-    BitCard(JokerCard jc) : cardData(Joker << 7 | jc.color << 6) {} // joker
+    BitCard(JokerCard& jc) : cardData(Joker << 7 | jc.getColor() << 6) {} // joker
     BitCard(Color c) : cardData(Joker << 7 | c << 6) {} // joker members
 
     // public accessors
+    CardType getType()
+    {return static_cast<CardType>(typeBits());}
+
+    Color getColor() {assert(getType() == Joker);
+    return static_cast<Color>(colorBits());}
+
+    Suit getSuit() {assert(getType() == Standard);
+    return static_cast<Suit>(suitBits());}
+
+    Rank getRank() {assert(getType() == Standard);
+    return static_cast<Rank>(rankBits());}
 };
 
 // with inheritance hierarchies
-class inheritanceCard
+class InheritanceCard // parent class (static type)
 {
 private:
-    //
+    // member data
+    // CardType type;
 public:
-    //
+    virtual InheritanceCard* clone() = 0; // virtual helper function (for copy constructor)
+
+    // constructors
+    InheritanceCard() = default; // default
+    InheritanceCard(const InheritanceCard& ic) = ic.clone(); // copy
+    // InheritanceCard(InheritanceSC isc) // standard
+    // InheritanceCard(Rank r, Suit s)
+    // InhertianceCard(InheritanceJC ijc) // joker
+    // InheritanceCard(Color c)
+
+    // CardType getType() {return type;} // public accessors
+};
+class InheritanceSC : InheritanceCard // sub-classes (dynamic types)
+{
+private:
+    // mmeber data
+    Rank rank;
+    Suit suit;
+public:
+    // constructors
+    InheritanceSC() = default;
+    InheritanceSC(const InheritanceSC& isc) : rank(isc.rank), suit(isc.suit) {}
+    InheritanceSC(Rank r, Suit s) : rank(r), suit(s) {}
+
+    virtual InheritanceCard* clone() {return new InheritanceSC(*this);} // virtual function override
+
+    // public accessors
+    Rank getRank() {return rank;}
+    Suit getSuit() {return suit;}
+};
+class InheritanceJC : InheritanceCard
+{
+private:
+    // member data
+    Color color;
+public:
+    // constructors
+    InheritanceJC() = default;
+    InheritanceJC(const InheritanceJC& ijc) : color(ijc.color) {}
+    InheritanceJC(Color c) : color(c) {}
+
+    virtual InheritanceCard* clone() {return new InheritanceJC(*this);} // virtual function override
+
+    // public accessors
+    Color getColor() {return color;}
 };
 
 int main()
