@@ -84,8 +84,49 @@ Game Flow details (Copied from README.md file)
 
 /*
 Changes from 2000 C version:
-    - Front-end
-    - Back-end
+    - Front-end:
+        - More in-game instructions
+            - Presented for each in-game mechanic as a menu option
+        - Turn menus presented in branching structure instead of being displayed in order automatically
+            - Browse action menus through a root menu
+        - Invasion mechanic expanded
+            - Human players can now invade their neighbors
+            - Grain can be seized as well as land
+        - Justice mechanic removed
+            - Was too confusing to implement
+        - Players can now choose the name of their town
+        - More fleshed-out AI
+            - Actually plays instead of just invading
+            - Up to 6 bots per game
+        - Turn structure simplified
+            - all actions -> grain release -> all results -> done
+        - Purchase volumes restricted and bankruptcy system enforced to prevent massive game-breaking purchases
+            - C version can be won in one turn by buying several million acres of land at a time
+    - Back-end:
+        - Better documentation for easier reading
+            - Code actually has comments and spacing now
+        - Split into multiple files - easier to nagivate program
+            - main.cpp (game flow)
+            - player.hpp and .cpp (player class)
+            - helperFunctions.hpp and .cpp (input and rng)
+            - parameters.hpp (constant parameters)
+        - Player struct represented as a class with member functions
+        - Seperation between private and public member data
+            - Access and modification of internal stats restricted to provided methods
+        - Some game formulas simplified for easier implementation
+            - Tax revenue
+            - Harvest
+            - Population change
+            - Combat
+        - Constant parameters stored in seperate file
+            - Starting stats
+            - Formula coefficients
+            - Value limits
+            - Ranks and bot mechanics
+        - Game elements comprising multiple data values or exhibiting similar behavior patterns represented as structs
+            - Taxes
+            - Resources
+            - Assets
 */
 
 #include <iostream>
@@ -365,7 +406,7 @@ void gameMenu(Player* currentPlayer, playerVector players, playerVector bots)
             break;
         case 7:
             // display helper instructions
-            std::cout << "This the main game menu from which you can make most of your decisions.\n"
+            std::cout << "\nThis the main game menu from which you can make most of your decisions.\n"
                       << "If this is your first time playing, take the time to look"
                       << "though each of your options to see what's available for you to do.\n"
                       << "Once you're done, select the End Turn option to proceed to the next step.\n";
@@ -432,14 +473,14 @@ void goodsMenu(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "Here you can make bulk purchases and sales of goods and "
+            std::cout << "\nHere you can make bulk purchases and sales of goods and "
                       << "resources that serve essential purposes for your town: "
                       << "- Grain is needed to feed your serfs and prevent them from starving. They'll produce some on their "
                       << " own each turn but you might need to buy extra in case of a poor harvest\n"
                       << "- Land mainly serves as a measure of your town's power and counts extra towards your score "
                       << "though it doesn't have any other uses implemented yet.\n"
                       << "On higher difficulties, goods sell for less than what you buy them for, "
-                      << "so make each transaction count.";
+                      << "so make each transaction count.\n";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -491,13 +532,13 @@ void assetMenu(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "Assets are long-term investments that can generate revenue over time, "
+            std::cout << "\nAssets are long-term investments that can generate revenue over time, "
                       << "either directly or by attracting tax-paying citizens to your town each turn.\n"
                       << "- Markets create a small amount of yearly revenue and can bring merchants to the town.\n"
                       << "- Mills create a moderate amount of yearly revenue.\n"
                       << "- Palaces can bring nobles to the town.\n"
                       << "- Cathedrals can bring clergy to the town.\n"
-                      << "In case of bankruptcy, your assets will be seized by creditors so be careful.\n";
+                      << "In case of bankruptcy, your assets will be seized by creditors, so be careful.\n";
 
             // pause output before returning to action menu so player can see instruction text
             std::cin.ignore(INT_MAX, '\n');
@@ -547,7 +588,7 @@ void taxMenu(Player* player)
             break;
         case 4:
             // display help
-            std::cout << "Taxes represent the main source of your yearly income, "
+            std::cout << "\nTaxes represent the main source of your yearly income, "
                       << "with each tax getting its revenue from different sources:\n"
                       << "- Sales: merchants, nobles, and assets\n"
                       << "- Income: nobles and assets\n"
@@ -603,7 +644,7 @@ void invasionMenu(Player* currentPlayer, playerVector players, playerVector bots
         if (choice == help)
         {
             // display help if player chose to do so
-            std::cout << "If you're tired of having to buy and manage your own resources, you "
+            std::cout << "\nIf you're tired of having to buy and manage your own resources, you "
                       << "can use your soldiers to attempt to seize grain, land, or assets "
                       << "by force from any of the other players in the game.  \n"
                       << "The defenders will fight back, though, so be sure to invest well enough "
@@ -670,7 +711,7 @@ void grainRelease(Player* player)
             break;
         case 5:
             // display help
-            std::cout << "While tax-paying citizens can eat on their own paycheck, "
+            std::cout << "\nWhile tax-paying citizens can eat on their own paycheck, "
                       << "your serfs rely on you to release a portion of your grain reserves "
                       << "each year in order to keep them fed.\n"
                       << "Not meeting the demand will result in serfs starving to death, while exceeding "
