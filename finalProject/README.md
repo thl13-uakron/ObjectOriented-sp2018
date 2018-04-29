@@ -1,131 +1,16 @@
-Game Elements and Abstractions:
+#Program Overview
+	This is a port of the 1979 video game *Santa Paranoia and Fiumancco* written in C++ with modern “object-oriented” programming techniques. *Santa Paravia* is essentially a primitive, text-based version of the popular *Civilization* series in which the player controls a single town in 1400s Italy and is tasked with managing wealth and resources to allow growth.
+	In making this project, I attempted to neatly split it into two parts: the objects and member functions that make up the game elements and mechanics, and the main program loop that would initialize objects and call functions as necessary to simulate gameplay and game flow, as will all be detailed below.
 
-Player Specifications:
-	- On an abstract level, the player is the ruler of medieval town in Europe.
-	- Code-wise, the Player class consists their game stats as members, dividable into the following categories :
-		- Member vars for personal stats; chosen at start of game, entered into class constructor, and remain unchanged:
-			- Their name
-			- Their gender
-			- Game difficulty
-			- Which player they are (p1, p2, etc.)
-			- The name of the town they rule (based on the above)
-		- Stats representing the town’s status; set to default values with object construction and change with each turn and player decision:
-			- Grain reserves, price, and demand
-			- Land owned, land prices
-			- Gold in treasury
-			- Town’s population, in the following categories:
-				- Serfs
-				- Clergy
-				- Noblemen
-				- Soldiers
-			- Town buildings and assets owned, in the following categories:
-				- Marketplaces
-				- Mills
-				- Palaces
-				- Cathedrals
-			- Tax rates, in the following categories:
-				- Customs
-				- Sales
-				- Income
-				- Justice
-			- Player’s rank
-				- Total of six possible values for ranks, players start at lowest one by default
-		- Functions that get called between turns to modify some of the above values based on others:
-			- Receive tax revenue 
-				- Depends on tax rates
-				- Personal wealth increases
-			- Receive grain harvest
-				- Depends on serf population
-				- Increases size of grain reserves
-			- Economy grows or shrinks
-				- Higher population can lead to higher economic growth
-				- Results in more wealth for the townspeople and more tax revenue in the future
-				- High taxes can restrict current economic growth though
-			- People die, get born, immigrate, or leave
-				- Depends on grain released
-				- Serfs will move in if more grain released than minimum
-				- Can increase or decrease population size
-			- Grain eaten by rats
-				- Grain reserves decreased certain percentage each turn.
-			- Pay expenses
-				- Upkeep for army and assets
-			- (Higher difficulty increases death rates, prices, and resource loss while decreasing revenue and growth rates)
-		- Same as previous, but not guaranteed to happen each turn:
-			- Invaded by neighboring nation
-				- Triggered by other players, doesn’t happen in single-player
-				- Can lose land or soldiers depending on amount of soldiers in your army and the opponent’s
-			- Assets seized to pay debts
-				- Can happen if wealth less than 0
-			- Promoted
-				- Rank increases by one if certain conditions are met
-				- Each rank promotion contains a requirement for
-				- Win game if max rank reached
-			- Die of certain causes
-				- Natural causes random but chance increases in later years
-				- 
-				- Results in game over
-		- Functions encompassing decisions that players make during turns that can affect the above members and functions:
-			- (Mostly self-explanatory in above context)
-			- Raise or lower taxes
-			- Release grain
-				- Certain percentage of grain reserves has to be distributed each turn serf consumption
-				- More grain released means less death rate and higher population growth
-				- New serfs will also move in if you have enough grain
-				- Releasing too much means you’ll deplete the reserves for future turns though
-			- Buy assets
-			- Buy grain or land
-			- Draft serfs into the army
-				- Convert of some of the serf population into soldiers
-				- Increases military strength but less economic output
-			- View status and standings (no effect on game itself)
-				- View ranks, wealth, population sizes, and land owned for each player
-			- Invade other player’s city-state
-				- 
-				- Only possible in multiplayer when other players are available to invade
-- 
+#Framework
+##Helper Functions
+	In addition to high-level classes representing game elements, the program’s framework also consists of a set of functions I wrote to carry out repetitive, low-level mechanical tasks in the program. This included functions for input validation, random number generation, random chance, and pausing the output.
+##Classes and Members
+	The player is the main element in the game. As an object, it consists of the player’s stats, as well as the stats for the player’s town, which can be bundled in since each player is assigned to a single town in the game. All of the data is stored in the class’s private access. The member functions in the class’s public access include functions representing in-game actions and events that can affect a player’s stats, as well as getter functions for read-only access of private data that is otherwise not intended for direct mutation.
+###Back-end
+	asdf
+###Front-end
+	asdf
 
-Game Flow:
-- Before game starts:
-	- User receives Y/N prompt for instructions 
-	- Display instructions depending on response and move on
-- Game setup:
-	- Start by asking the amount of players (min 1, max 6)
-	- Prompt each player for starting information:
-		- Player name
-		- Town name
-		- Gender
-		- Difficulty
-	- Initialize vector of player classes using input as constructors
-- Repeating turn structure:
-	- Done for each player, starting with the first one in the vector
-	- Start by displaying effects of guaranteed events that take place before turn starts
-		- Rats eat portion of grain reserves
-		- Receive grain harvest from serfs
-		- Receive tax revenue
-		- Serfs get born, die, move in, or leave
-		- Economy grows or shrinks
-	- Display series of action menus that allow player to make purchases and decision with relevant stats being showed
-	- First allows player to make basic goods transactions
-		- Buy or sell grain
-		- Buy or sell land
-		- Demand, current reserve, and price for both are displayed along with player’s gold
-		- Following decision, player gets another input prompt for quantity
-		- Menu repeats after each action until player chooses option to continue
-	- Buying assets (buildings)
-		-
-	- Releasing grain
-		-
-	- Other administrative decisions
-		- Adjust taxes
-		- Draft serf into the army
-		- Invade neighbors
-	- Game process for handling debt:
-		-
-- Ending conditions:
-	- Game ends if one player wins or all players lose
-		- Lose the game by dying
-		- Win the game by reaching max rank
-	- (See previous sections for details)
-
-
-
+#Program Flow
+	asdf
