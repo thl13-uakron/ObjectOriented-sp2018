@@ -50,7 +50,8 @@ void Player::sell(Commodity& product, int quantity)
     if (quantity > product.owned)
         throw std::logic_error("Error: Calling game function sell() with out-of-range parameters.");
 
-    int earnings = getPrice(product) * quantity; // get amount of gold earned from sale
+    int earnings = (getPrice(product) * quantity) / // get amount of gold earned from sale
+                   (diffModifier() > 1 ? diffModifier() : 1); // higher difficulties can result in lower resale value
 
     // proceed with sale
     product.owned -= quantity;
@@ -71,7 +72,7 @@ void Player::adjustPrice(Commodity& product)
     std::cout << "The price of " << product.name <<  " in " << townName << " has changed to " << getPrice(product) <<" gold.\n"; // display results in program output
 }
 
-void Player::buy(Asset& building)
+/*void Player::buy(Asset& building) no longer necessary due to addition of inheritance hierarchy
 {
     // enforce general void preconditions
     if (gameEnded())
@@ -93,7 +94,7 @@ void Player::buy(Asset& building)
         // check if purchase has resulted in bankruptcy, act accordingly
         if (isBankrupt()) bankruptcy();
     }
-}
+}*/
 
 void Player::attractCitizens(Asset building)
 {
@@ -132,18 +133,36 @@ void Player::adjustRate(int8& oldRate, int8 newRate, int8 minRate, int8 maxRate)
 
 /// in-game actions and misc events
 
-void Player::invade(Player* opponent)
+void Player::invade(Player* defender)
 {
     // enforce general void preconditions
-    if (gameEnded() || opponent->gameEnded())
+    if (gameEnded() || defender->gameEnded())
         throw std::logic_error("Error: Game function invade() being called after endgame conditions already reached.");
 
-    // placeholder
-    std::cout << '\n' << getTitle() << ' ' << name << "'s forces invade " << opponent->getTownName() << "!\n"
-              << "[Invasion mechanic not implemented yet]\n";
+    // display header text
+    std::cout << getName() << "'s army has invaded " << defender->getTownName() << "!\n";
 
-    int16 invaderCasualties;
-    int16 defenderCasualties;
+    // invasion process:
+    // randomly determine casualties for each player depending on strength of other player's army
+    // if defending (other) player loses greater than a certain percentage of their army, they "lose", otherwise they "win"
+    // no resources lost if defenders win, otherwise an amount of grain and land is lost based on the margin of defeat and seized by attacking (this) player
+    // deduct casualties and resource seizures from player stats, display in output
+
+    // get casualties
+    // formula: proportion of size of opposing army chosen randomly between two parameters
+    int16 invaderCasualties = random(defender->getSoldiers() * percent(MIN_CASUALTY_RATE), defender->getSoldiers() * percent(MAX_CASUALTY_RATE));
+    if (invaderCasualties > getSoldiers()) invaderCasualties = getSoldiers(); // casualties capped at 100 percent
+
+    // repeat process for other player
+    int16 defenderCasualties = random(getSoldiers() * percent(MIN_CASUALTY_RATE), getSoldiers() * percent(MAX_CASUALTY_RATE));
+    if (defenderCasualties > defender->getSoldiers()) defenderCasualties = getSoldiers();
+
+    // determine outcome and take into effect, display accordingly
+
+    // take casualties into effect and display
+
+    // break output to allow user to view results
+    pressEnterToContinue("(Press ENTER to continue)");
 }
 
 void Player::releaseGrain(int quantity)
@@ -430,7 +449,7 @@ void Player::turnResults()
 
     // program output header
     std::cout << "\nAnnual report for " << getTitle() << ' ' << name
-    << " of " << townName << ", Year " << year;
+    << " of " << townName << ", Year " << year << "\n";
 
     // take all the functions scheduled to get called after a player's turn
     // and call all of them by category

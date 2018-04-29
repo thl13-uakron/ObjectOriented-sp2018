@@ -253,44 +253,51 @@ private:
     // essential items that can be bought, sold, or consumed in bulk
     struct Commodity // data structure, consists of the owned quantity, the cost in gold to buy more on normal difficulty, and the displayed name of the good
     {
-        int owned;
-        int8 basePrice; // base prices can flunctuate, generally don't exceed 100-200
+        int owned = 0;
+        int16 basePrice; // base prices can flunctuate
         const std::string name;
         // other in-game behavior varies, mainly covered in the game functions
+
+        // constructors
+        Commodity() = default; // default
+        Commodity(int owned, int basePrice, std::string name) // with member initializations
+        : owned(owned), basePrice(basePrice), name(name) {};
     };
     // take difficulty into account for the "true" prices
-    int16 getPrice(Commodity product) const {return product.basePrice * diffModifier();}
+    int16 getPrice(const Commodity& product) const {return product.basePrice * diffModifier();}
 
     // helper functions do basic processes of "buying" or selling a quantity of goods in the game
     // intended for indirect usage (called by other member functions in the public access)
+
     void buy(Commodity& product, int quantity);
     // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0
     // post: increase commodity's owned quantity by quantity parameter, decrease gold by quantity times price, display results in program output to inform user
     // inform player if purchase would put them into debt and check if player has become bankrupt from purchase
+    void buy(Commodity& product) {buy(product, 1);} // overload for only one parameter
+
     void sell(Commodity& product, int quantity);
     // pre: player object initialized, commodity parameter is member of object, function called by public member of object, valid quantity parameter greater than 0 and less than the owned product quantity
     // post: decrease commodity's owned quantity by quantity parameter, increase gold by quantity times price, display results in program output to inform user
+    void sell(Commodity& product) {sell(product, 1);} // overload for only one parameter
+
     void adjustPrice(Commodity& product);
     // pre: player object intialized, commodity parameter is member of object
     // post: changes the price member of the commodity to a randomized value
 
     // grain implementation
-    Commodity grain = {STARTING_GRAIN, GRAIN_PRICE, "grain"}; // grain is required to feed the town's population, which can grow or starve depending on the amount it gets access to
+    Commodity grain = *new Commodity(STARTING_GRAIN, GRAIN_PRICE, "grain"); // grain is required to feed the town's population, which can grow or starve depending on the amount it gets access to
     int releasedGrain = 0; // how much of the grain reserves the player distributes to the townspeople, set to half the starting grain for the first turn
 
     // land implementation
-    Commodity land = {STARTING_LAND, LAND_PRICE, "land"}; // land is needed for
+    Commodity land = *new Commodity(STARTING_LAND, LAND_PRICE, "land"); // land is needed for
 
     // soldiers are part of the population on an abstract level but are implemented as commodities because they can be bought
-    Commodity soldiers = {STARTING_SOLDIERS, SOLDIER_COST, "soldiers"}; // require yearly payments in gold, mainly used as part of the invasion mechanic
+    Commodity soldiers = *new Commodity(STARTING_SOLDIERS, SOLDIER_COST, "soldiers"); // require yearly payments in gold, mainly used as part of the invasion mechanic
 
     /// implementation for assets
     // set of high-value in-game investments that serve similar, generic purposes of attracting tax-paying citizens and/or generating monthly revenu
-    struct Asset // data structure, consists of base prices, owned quantity, displayed name, and behavior parameters
-    {
-        int16 owned;
-        const int16 basePrice; // asset prices tend to be constant
-        const std::string name;
+    struct Asset : Commodity // data structure inherits commodity members for base price, amount owned, and item name
+    { // also consists of additional members representing parameters for in-game behavior
 
         // yearly revenue generation
         const int16 minRevenue;
@@ -300,15 +307,15 @@ private:
         const int8 merchantsAttracted; // represent maximum values (can be 0)
         const int8 clergyAttracted;
         const int8 noblesAttracted;
-    };
-    // take difficulty into account for the "true" prices
-    int16 getPrice(Asset building) const {return building.basePrice * diffModifier();}
 
-    // buy function similar to one found above that conducts addtional operations shared among asset objects
-    void buy(Asset& building);
-    // pre: player object initialized, asset parameter is member of object, function called by public member of object, player isn't dead, game hasn't ended
-    // post: increase asset's owned quantity by one and deduct the price from the player's gold, increase player's population members based on asset attributes, display results in program output
-    // inform player if purchase would put them into debt and check if player has become bankrupt from purchase
+        // constructors
+        Asset() = default; // default
+        // with member initializations
+        Asset(int owned, int basePrice, std::string name, int minRevenue, int maxRevenue, int merchantsAttracted, int clergyAttracted, int noblesAttracted)
+        : Commodity(owned, basePrice, name), minRevenue(minRevenue), maxRevenue(maxRevenue)
+        , merchantsAttracted(merchantsAttracted), clergyAttracted(clergyAttracted), noblesAttracted(noblesAttracted) {}
+    };
+    // can use buy and getPrice functions for Commodity struct through dynamic typing
 
     // function to bring new people into the town each turn from assets
     void attractCitizens(Asset building);
@@ -323,10 +330,10 @@ private:
     {return marketplace.owned + mill.owned + cathedral.owned + palace.owned;} // simple helper function returns total number of town buildings for taxation purposes
 
     // current implemented types
-    Asset marketplace = {0, MARKET_PRICE, "market", MIN_MARKET_REVENUE, MAX_MARKET_REVENUE, MARKET_MERCHANTS, 0, 0}; // markets bring merchants to the town and generate revenue
-    Asset mill = {0, MILL_PRICE, "mill", MIN_MILL_REVENUE, MAX_MILL_REVENUE, 0, 0, 0}; // mills don't bring in new people but generate revenue
-    Asset cathedral = {0, CATHEDRAL_PRICE, "cathedral", 0, 0, 0, CATHEDRAL_CLERGY, 0}; // cathedrals bring clergy to the town
-    Asset palace = {0, PALACE_PRICE, "palace", 0, 0, 0, 0, PALACE_NOBLES}; // palaces bring nobles to the town
+    Asset marketplace = *new Asset(0, MARKET_PRICE, "market", MIN_MARKET_REVENUE, MAX_MARKET_REVENUE, MARKET_MERCHANTS, 0, 0); // markets bring merchants to the town and generate revenue
+    Asset mill = *new Asset(0, MILL_PRICE, "mill", MIN_MILL_REVENUE, MAX_MILL_REVENUE, 0, 0, 0); // mills don't bring in new people but generate revenue
+    Asset cathedral = *new Asset(0, CATHEDRAL_PRICE, "cathedral", 0, 0, 0, CATHEDRAL_CLERGY, 0); // cathedrals bring clergy to the town
+    Asset palace = *new Asset(0, PALACE_PRICE, "palace", 0, 0, 0, 0, PALACE_NOBLES); // palaces bring nobles to the town
 
     /// implementation for taxes
     // data structure consisting of all the relevant attributes in a tax
@@ -338,6 +345,8 @@ private:
         const int8 clergyRevenue; // for purposes of calculating tax income
         const int8 nobleRevenue;
         const int8 assetRevenue;
+
+        // constructor
     };
 
     // int8 taxJustice = TAX_JUSTICE; // measured on a scale of 1-4, determines strictness of enforcement of taxes, which affects revenue (currently not implemented)
